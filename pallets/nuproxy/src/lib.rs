@@ -39,6 +39,11 @@ pub mod pallet {
 	// https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
 	pub type Something<T> = StorageValue<_, u32>;
 
+	// the wather can only start working after registration
+	#[pallet::storage]
+	#[pallet::getter(fn watchers)]
+	pub(super) type Watchers<T> = StorageMap<_, Blake2_128Concat, T::AccountId, u32, ValueQuery>;
+
 	// Pallets use events to inform users when important changes are made.
 	// https://substrate.dev/docs/en/knowledgebase/runtime/events
 	#[pallet::event]
