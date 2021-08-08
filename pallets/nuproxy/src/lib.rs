@@ -62,6 +62,7 @@ pub mod pallet {
 		NoneValue,
 		/// Errors should have helpful documentation associated with them.
 		StorageOverflow,
+		AlreadyExist,
 	}
 
 	#[pallet::hooks]
@@ -105,6 +106,19 @@ pub mod pallet {
 					// Update the value in storage with the incremented result.
 					<Something<T>>::put(new);
 					Ok(())
+				},
+			}
+		}
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn set_watcher(origin: OriginFor<T>) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			match <Watchers<T>>::get(who.clone()) {
+				None => {
+					<Watchers<T>>::insert(who.clone(),1);
+					Ok(())
+				},
+				Some(val) => {
+					Err(Error::<T>::AlreadyExist)?
 				},
 			}
 		}
