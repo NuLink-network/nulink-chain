@@ -5,6 +5,7 @@
 /// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
 
 pub use pallet::*;
+use sp_runtime::traits::One;
 
 #[cfg(test)]
 mod mock;
@@ -122,5 +123,17 @@ pub mod pallet {
 				},
 			}
 		}
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn set_staker_info(origin: OriginFor<T>) -> DispatchResult {
+
+			Ok(())
+		}
+	}
+}
+
+impl<T: Config> Pallet<T>  {
+
+	pub fn exist_watcher(watcher: T::AccountId) -> bool {
+		Watchers::<T>::get(watcher.clone()).is_one()
 	}
 }
