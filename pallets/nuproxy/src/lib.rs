@@ -15,6 +15,7 @@ mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+mod types;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -135,5 +136,12 @@ impl<T: Config> Pallet<T>  {
 
 	pub fn exist_watcher(watcher: T::AccountId) -> bool {
 		Watchers::<T>::get(watcher.clone()).is_one()
+	}
+	pub fn remove_unused_watcher() {
+		let unused: Vec<_> = Watchers::<T>::iter()
+			.filter(|&(_, &v)| v == 0)
+			.map(|(k, _)| k.clone())
+			.collect();
+		for k in unused { Watchers::<T>::remove(&k); }
 	}
 }
