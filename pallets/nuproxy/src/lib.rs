@@ -14,12 +14,9 @@ mod types;
 
 
 pub use pallet::*;
-use sp_runtime::{
-	traits::{
-		AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub, Saturating, StaticLookup, Zero,
-	},
-	ArithmeticError,
-};
+use sp_runtime::{traits::{
+	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub, Saturating, StaticLookup, Zero,
+}, ArithmeticError, DispatchResult};
 pub use types::{StakeInfo};
 
 #[frame_support::pallet]
@@ -141,15 +138,19 @@ pub mod pallet {
 		}
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn set_staker_infos_and_mint(origin: OriginFor<T>,
-							   infos: Vec<crate::types::StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
+							   infos: Vec<StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
 
-			Ok(())
+			Self::mint_by_watcher(Self::calc_reward_by_epoch())?;
+			Self::update_stakers(infos)
 		}
 	}
 }
 
 impl<T: Config> Pallet<T>  {
 
+	pub fn calc_reward_by_epoch() -> T::Balance {
+		One::one()
+	}
 	pub fn exist_watcher(watcher: T::AccountId) -> bool {
 		Watchers::<T>::get(watcher.clone()).is_one()
 	}
@@ -159,5 +160,12 @@ impl<T: Config> Pallet<T>  {
 			.map(|(k, _)| k.clone())
 			.collect();
 		for k in unused { Watchers::<T>::remove(&k); }
+	}
+	pub fn update_stakers(new_stakers: Vec<StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
+
+		Ok(())
+	}
+	pub fn mint_by_watcher(all_reward: T::Balance) -> DispatchResult {
+		Ok(())
 	}
 }
