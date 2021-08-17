@@ -4,29 +4,38 @@
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
 
-pub use pallet::*;
-use sp_runtime::traits::One;
-
 #[cfg(test)]
 mod mock;
-
 #[cfg(test)]
 mod tests;
-
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 mod types;
 
+
+pub use pallet::*;
+use sp_runtime::{
+	traits::{
+		AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub, Saturating, StaticLookup, Zero,
+	},
+	ArithmeticError,
+};
+pub use types::{StakeInfo};
+
 #[frame_support::pallet]
 pub mod pallet {
+	use super::*;
 	use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
 	use frame_system::pallet_prelude::*;
+
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		/// The units in which we record balances of the outside's balance value.
+		type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy + MaxEncodedLen;
 	}
 
 	#[pallet::pallet]
@@ -45,6 +54,12 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn watchers)]
 	pub(super) type Watchers<T> = StorageMap<_, Blake2_128Concat, T::AccountId, u32, ValueQuery>;
+
+	#[pallet::storage]
+	/// Metadata of an asset.
+	pub(super) type Stakers<T> = StorageMap<_, Blake2_128Concat, T::AccountId,
+		StakeInfo<T::AccountId, T::Balance>,
+		ValueQuery>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://substrate.dev/docs/en/knowledgebase/runtime/events
@@ -125,7 +140,8 @@ pub mod pallet {
 			}
 		}
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn set_staker_info(origin: OriginFor<T>) -> DispatchResult {
+		pub fn set_staker_infos_and_mint(origin: OriginFor<T>,
+							   infos: Vec<crate::types::StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
 
 			Ok(())
 		}
