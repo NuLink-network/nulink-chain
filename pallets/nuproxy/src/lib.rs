@@ -162,7 +162,19 @@ impl<T: Config> Pallet<T>  {
 		for k in unused { Watchers::<T>::remove(&k); }
 	}
 	pub fn update_stakers(new_stakers: Vec<StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
-
+		let keys = Stakers::<T>::iter_keys().collect::<Vec<_>>();
+		for key in keys {Stakers::<T>::mutate(key.clone(),|value|{
+			value.iswork = false;
+		})}
+		for new_staker in new_stakers {
+			if Stakers::<T>::contains_key(new_staker.coinbase) {
+				Stakers::<T>::mutate(new_staker.coinbase,|value|{
+					value.iswork = true;
+				});
+			} else {
+				Stakers::<T>::insert(new_staker.coinbase.clone(),new_staker);
+			}
+		}
 		Ok(())
 	}
 	pub fn mint_by_watcher(all_reward: T::Balance) -> DispatchResult {
