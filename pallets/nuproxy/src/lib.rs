@@ -18,6 +18,7 @@ use sp_runtime::{traits::{
 	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub, Saturating, StaticLookup, Zero,
 }, ArithmeticError, DispatchResult};
 pub use types::{StakeInfo};
+use sp_runtime::traits::Hash;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -54,7 +55,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	/// Metadata of an asset.
-	pub(super) type Stakers<T> = StorageMap<_, Blake2_128Concat, T::AccountId,
+	pub(super) type Stakers<T> = StorageMap<_, Blake2_128Concat, T::Hash,
 		StakeInfo<T::AccountId, T::Balance>,
 		ValueQuery>;
 
@@ -148,6 +149,12 @@ pub mod pallet {
 
 impl<T: Config> Pallet<T>  {
 
+	pub fn calc_staker_hash(staker: StakeInfo<T::AccountId,T::Balance>) -> T::Hash {
+		let mut s = staker.clone();
+		s.iswork = false;
+		s.lockedBalance = Zero::zero();
+		T::Hashing::hash_of(&s)
+	}
 	pub fn calc_reward_by_epoch() -> T::Balance {
 		One::one()
 	}
@@ -163,16 +170,18 @@ impl<T: Config> Pallet<T>  {
 	}
 	pub fn update_stakers(new_stakers: Vec<StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
 		let keys = Stakers::<T>::iter_keys().collect::<Vec<_>>();
+		//
 		for key in keys {Stakers::<T>::mutate(key.clone(),|value|{
 			value.iswork = false;
 		})}
 		for new_staker in new_stakers {
-			if Stakers::<T>::contains_key(new_staker.coinbase) {
-				Stakers::<T>::mutate(new_staker.coinbase,|value|{
+			let new_key = Self::calc_staker_hash(new_staker.clone());
+			if Stakers::<T>::contains_key(new_key.clone()) {
+				Stakers::<T>::mutate(new_key.clone(),|value|{
 					value.iswork = true;
 				});
 			} else {
-				Stakers::<T>::insert(new_staker.coinbase.clone(),new_staker);
+				Stakers::<T>::insert(new_key.clone(),new_staker);
 			}
 		}
 		Ok(())
