@@ -3,9 +3,12 @@
 use super::*;
 use frame_support::pallet_prelude::*;
 
-use frame_support::traits::{fungible, tokens::BalanceConversion};
+use frame_support::traits::{fungible, tokens::BalanceConversion, Currency};
 use sp_runtime::{traits::Convert, FixedPointNumber, FixedPointOperand, FixedU128};
 
+
+type BalanceOf<T> =
+<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, MaxEncodedLen)]
 pub struct StakeInfo<Balance,AccountId> {

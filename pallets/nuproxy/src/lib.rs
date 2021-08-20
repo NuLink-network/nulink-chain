@@ -19,12 +19,14 @@ use sp_runtime::{traits::{
 }, ArithmeticError, DispatchResult};
 pub use types::{StakeInfo};
 use sp_runtime::traits::Hash;
+use frame_support::traits::Get;
 
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
 	use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
 	use frame_system::pallet_prelude::*;
+	use frame_support::traits::ReservableCurrency;
 
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -34,6 +36,11 @@ pub mod pallet {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 		/// The units in which we record balances of the outside's balance value.
 		type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy + MaxEncodedLen;
+		/// The currency trait.
+		type Currency: ReservableCurrency<Self::AccountId>;
+		/// The balance unit for the staker's reward.
+		#[pallet::constant]
+		type RewardUnit: Get<BalanceOf<Self>>;
 	}
 
 	#[pallet::pallet]
@@ -54,10 +61,15 @@ pub mod pallet {
 	pub(super) type Watchers<T> = StorageMap<_, Blake2_128Concat, T::AccountId, u32, ValueQuery>;
 
 	#[pallet::storage]
-	/// Metadata of an asset.
+	/// Metadata of an staker.
 	pub(super) type Stakers<T> = StorageMap<_, Blake2_128Concat, T::Hash,
 		StakeInfo<T::AccountId, T::Balance>,
 		ValueQuery>;
+
+	#[pallet::storage]
+	/// reserved rewards of the stakers,staker need claim it.
+	pub(super) type Rewards<T> =  StorageMap<_, Blake2_128Concat, T::AccountId, T::Balance, ValueQuery>;
+
 
 	// Pallets use events to inform users when important changes are made.
 	// https://substrate.dev/docs/en/knowledgebase/runtime/events
@@ -156,6 +168,7 @@ impl<T: Config> Pallet<T>  {
 		T::Hashing::hash_of(&s)
 	}
 	pub fn calc_reward_by_epoch() -> T::Balance {
+		let unit = T::RewardUnit::get();
 		One::one()
 	}
 	pub fn exist_watcher(watcher: T::AccountId) -> bool {
@@ -170,7 +183,6 @@ impl<T: Config> Pallet<T>  {
 	}
 	pub fn update_stakers(new_stakers: Vec<StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
 		let keys = Stakers::<T>::iter_keys().collect::<Vec<_>>();
-		//
 		for key in keys {Stakers::<T>::mutate(key.clone(),|value|{
 			value.iswork = false;
 		})}
@@ -187,6 +199,7 @@ impl<T: Config> Pallet<T>  {
 		Ok(())
 	}
 	pub fn mint_by_watcher(all_reward: T::Balance) -> DispatchResult {
+
 		Ok(())
 	}
 }
