@@ -20,6 +20,7 @@ use sp_runtime::{traits::{
 pub use types::{StakeInfo};
 use sp_runtime::traits::Hash;
 use frame_support::traits::Get;
+use parity_scale_codec::Joiner;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -171,6 +172,14 @@ impl<T: Config> Pallet<T>  {
 		let unit = T::RewardUnit::get();
 		One::one()
 	}
+	pub fn get_total_staking() -> T::Balance {
+		Stakers::<T>::iter()
+			.filter(|&(_,val)| val.iswork)
+			.map(|(_,val)| val.clone())
+			.fold(Zero::zero(),|acc,v|{
+				acc + v.lockedBalance
+			})
+	}
 	pub fn exist_watcher(watcher: T::AccountId) -> bool {
 		Watchers::<T>::get(watcher.clone()).is_one()
 	}
@@ -198,8 +207,13 @@ impl<T: Config> Pallet<T>  {
 		}
 		Ok(())
 	}
-	pub fn mint_by_watcher(all_reward: T::Balance) -> DispatchResult {
-
+	pub fn mint_by_staker(all_reward: T::Balance) -> DispatchResult {
+		let total = Self::get_total_staking();
+		// Stakers::<T>::iter()
+		// 	.filter(|&(_,val)| val.iswork)
+		// 	.map(|(_,val)| {
+		//
+		// 	});
 		Ok(())
 	}
 }
