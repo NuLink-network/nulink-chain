@@ -1,1 +1,14 @@
-theme: jekyll-theme-time-machine
+title: Nulink
+lang: en
+description: NuLink is a decentralized solution for privacy-preserving application!
+
+remote_theme: rundocs/jekyll-rtd-theme
+
+readme_index:
+  with_frontmatter: true
+
+exclude:
+  - Makefile
+  - CNAME
+  - Gemfile
+  - Gemfile.lock
