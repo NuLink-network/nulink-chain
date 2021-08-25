@@ -154,7 +154,7 @@ pub mod pallet {
 		pub fn set_staker_infos_and_mint(origin: OriginFor<T>,
 							   infos: Vec<StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
 
-			Self::mint_by_watcher(Self::calc_reward_by_epoch())?;
+			Self::mint_by_staker(Self::calc_reward_by_epoch())?;
 			Self::update_stakers(infos)
 		}
 	}
@@ -209,11 +209,31 @@ impl<T: Config> Pallet<T>  {
 	}
 	pub fn mint_by_staker(all_reward: T::Balance) -> DispatchResult {
 		let total = Self::get_total_staking();
-		// Stakers::<T>::iter()
-		// 	.filter(|&(_,val)| val.iswork)
-		// 	.map(|(_,val)| {
-		//
-		// 	});
+		let cur_all_reward: Vec<_> = Stakers::<T>::iter()
+			.filter(|&(_,val)| val.iswork)
+			.map(|(_,val)| {
+				let reward = (val.lockedBalance.clone() * all_reward.clone()) / total.clone();
+				(val.coinbase.clone(),reward)
+			})
+			.collect();
+
+		let count = cur_all_reward.len();
+		let mut all: T::Balance = Zero::zero();
+		let mut left: T::Balance = Zero::zero();
+
+		for i in 0..count {
+			if i == count - 1 {
+				left = all_reward.saturating_sub(all.clone());
+			} else {
+				left = cur_all_reward[i].1.clone();
+			}
+			all = all.saturating_add(left.clone());
+			Rewards::<T>::mutate(cur_all_reward[i].0.clone(),|b| -> DispatchResult {
+				let amount = b.saturating_add(left.clone());
+				*b = *amount;
+				Ok(())
+			})
+		}
 		Ok(())
 	}
 }
