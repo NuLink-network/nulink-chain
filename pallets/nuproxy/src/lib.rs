@@ -102,6 +102,8 @@ pub mod pallet {
 		BalanceLow,
 		/// Balance should be non-zero
 		BalanceZero,
+		/// Vault balance must be greater than or equal to the reward amount
+		VaultBalanceLow,
 	}
 
 	#[pallet::hooks]
@@ -178,6 +180,10 @@ impl<T: Config> Pallet<T>  {
     /// value and only call this once.
 	pub fn account_id() -> T::AccountId {
 		T::PalletId::get().into_account()
+	}
+	pub fn vault_balance() -> T::Balance {
+		let vault = Self::account_id();
+		T::Currency::free_balance(&vault)
 	}
 	pub fn calc_staker_hash(staker: StakeInfo<T::AccountId,T::Balance>) -> T::Hash {
 		let mut s = staker.clone();
@@ -257,8 +263,11 @@ impl<T: Config> Pallet<T>  {
 		if !Rewards::<T>::contains_key(staker.clone()) {
 			Err(Error::<T>::AccountNotExist)?
 		}
+
 		Rewards::<T>::mutate(staker.clone(), |&mut old_balance| -> DispatchResult {
 			ensure!(old_balance >= amount, Error::<T>::BalanceLow);
+			ensure!(Self::vault_balance() >= amount, Error::<T>::VaultBalanceLow);
+
 			old_balance = old_balance.checked_sub(&amount)
 				.ok_or(Error::<T>::BalanceLow)?;
 			let valut: T::AccountId = Self::account_id();
