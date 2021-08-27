@@ -15,19 +15,19 @@ mod types;
 
 pub use pallet::*;
 use sp_runtime::{traits::{
-	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub, Saturating, StaticLookup, Zero,
+	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
+	Saturating, StaticLookup, Zero,Hash,
 }, ArithmeticError, DispatchResult};
 pub use types::{StakeInfo};
-use sp_runtime::traits::Hash;
 use frame_support::traits::Get;
 use parity_scale_codec::Joiner;
 
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
+	use frame_support::{dispatch::DispatchResult, pallet_prelude::*, PalletId};
 	use frame_system::pallet_prelude::*;
-	use frame_support::traits::ReservableCurrency;
+	use frame_support::traits::{ReservableCurrency,ExistenceRequirement::AllowDeath};
 
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -42,6 +42,9 @@ pub mod pallet {
 		/// The balance unit for the staker's reward.
 		#[pallet::constant]
 		type RewardUnit: Get<BalanceOf<Self>>;
+		/// The nulink's pallet id, used for deriving its sovereign account ID.
+		#[pallet::constant]
+		type PalletId: Get<PalletId>;
 	}
 
 	#[pallet::pallet]
@@ -91,6 +94,12 @@ pub mod pallet {
 		/// Errors should have helpful documentation associated with them.
 		StorageOverflow,
 		AlreadyExist,
+		/// Account hasn't reward in the epoch
+		AccountNotExist,
+		/// Account balance must be greater than or equal to the transfer amount
+		BalanceLow,
+		/// Balance should be non-zero
+		BalanceZero,
 	}
 
 	#[pallet::hooks]
@@ -161,7 +170,13 @@ pub mod pallet {
 }
 
 impl<T: Config> Pallet<T>  {
-
+	/// The account ID of the treasury pot.
+    ///
+    /// This actually does computation. If you need to keep using it, then make sure you cache the
+    /// value and only call this once.
+	pub fn account_id() -> T::AccountId {
+		T::PalletId::get().into_account()
+	}
 	pub fn calc_staker_hash(staker: StakeInfo<T::AccountId,T::Balance>) -> T::Hash {
 		let mut s = staker.clone();
 		s.iswork = false;
@@ -234,6 +249,20 @@ impl<T: Config> Pallet<T>  {
 				Ok(())
 			})
 		}
+		Ok(())
+	}
+	pub fn base_reward(staker: T::AccountId,amount: T::Balance) -> DispatchResult {
+		if !Rewards::<T>::contains_key(staker.clone()) {
+			Err(Error::<T>::AccountNotExist)?
+		}
+		Rewards::<T>::mutate(staker.clone(), |&mut old_balance| -> DispatchResult {
+			ensure!(old_balance >= amount, Error::<T>::BalanceLow);
+			old_balance = old_balance.checked_sub(&amount)
+				.ok_or(Error::<T>::BalanceLow)?;
+			Ok(())
+		})?;
+		let valut: T::AccountId = Self::account_id();
+		T::Currency::transfer(&valut,&staker,amount,AllowDeath)?;
 		Ok(())
 	}
 }
