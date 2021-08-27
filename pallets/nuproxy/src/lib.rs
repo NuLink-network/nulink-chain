@@ -17,17 +17,19 @@ pub use pallet::*;
 use sp_runtime::{traits::{
 	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
 	Saturating, StaticLookup, Zero,Hash,
-}, ArithmeticError, DispatchResult};
+}, ArithmeticError};
 pub use types::{StakeInfo};
-use frame_support::traits::Get;
+use frame_support::{
+	traits::{Get,ReservableCurrency, ExistenceRequirement::AllowDeath, Currency},
+	dispatch::DispatchResult, pallet_prelude::*, PalletId
+};
 use parity_scale_codec::Joiner;
+use sp_runtime::traits::AccountIdConversion;
 
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::{dispatch::DispatchResult, pallet_prelude::*, PalletId};
 	use frame_system::pallet_prelude::*;
-	use frame_support::traits::{ReservableCurrency,ExistenceRequirement::AllowDeath};
 
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -38,7 +40,7 @@ pub mod pallet {
 		/// The units in which we record balances of the outside's balance value.
 		type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy + MaxEncodedLen;
 		/// The currency trait.
-		type Currency: ReservableCurrency<Self::AccountId>;
+		type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
 		/// The balance unit for the staker's reward.
 		#[pallet::constant]
 		type RewardUnit: Get<BalanceOf<Self>>;
@@ -259,10 +261,8 @@ impl<T: Config> Pallet<T>  {
 			ensure!(old_balance >= amount, Error::<T>::BalanceLow);
 			old_balance = old_balance.checked_sub(&amount)
 				.ok_or(Error::<T>::BalanceLow)?;
-			Ok(())
-		})?;
-		let valut: T::AccountId = Self::account_id();
-		T::Currency::transfer(&valut,&staker,amount,AllowDeath)?;
-		Ok(())
+			let valut: T::AccountId = Self::account_id();
+			T::Currency::transfer(&valut,&staker,amount,AllowDeath)
+		})
 	}
 }
