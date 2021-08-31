@@ -25,6 +25,7 @@ use frame_support::{
 };
 use parity_scale_codec::Joiner;
 use sp_runtime::traits::AccountIdConversion;
+use sp_core::crypto::Ss58AddressFormat::ZeroAccount;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -170,6 +171,11 @@ pub mod pallet {
 			Self::mint_by_staker(Self::calc_reward_by_epoch())?;
 			Self::update_stakers(infos)
 		}
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn claim_reward_by_staker(origin: OriginFor<T>,amount: T::Balance) -> DispatchResult {
+			let staker = ensure_signed(origin)?;
+			Self::base_reward(staker,amount)
+		}
 	}
 }
 
@@ -260,6 +266,8 @@ impl<T: Config> Pallet<T>  {
 		Ok(())
 	}
 	pub fn base_reward(staker: T::AccountId,amount: T::Balance) -> DispatchResult {
+		ensure!(amount >= Zero::zero(), Error::<T>::BalanceLow);
+
 		if !Rewards::<T>::contains_key(staker.clone()) {
 			Err(Error::<T>::AccountNotExist)?
 		}
