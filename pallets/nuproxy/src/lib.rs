@@ -20,6 +20,7 @@ use sp_runtime::{traits::{
 }, ArithmeticError};
 pub use types::{StakeInfo};
 use frame_support::{
+	ensure,
 	traits::{Get,ReservableCurrency, ExistenceRequirement::AllowDeath, Currency},
 	dispatch::DispatchResult, pallet_prelude::*, PalletId
 };
