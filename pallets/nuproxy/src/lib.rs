@@ -25,7 +25,6 @@ use frame_support::{
 };
 use parity_scale_codec::Joiner;
 use sp_runtime::traits::AccountIdConversion;
-use sp_core::crypto::Ss58AddressFormat::ZeroAccount;
 
 #[frame_support::pallet]
 pub mod pallet {
