@@ -87,6 +87,8 @@ pub mod pallet {
 		/// Event documentation should end with an array that provides descriptive names for event
 		/// parameters. [something, who]
 		SomethingStored(u32, T::AccountId),
+		/// Reserve asset to the vault
+		ReserveBalance(T::AccountId,T::Balance),
 	}
 
 	// Errors inform users that something went wrong.
@@ -175,6 +177,18 @@ pub mod pallet {
 		pub fn claim_reward_by_staker(origin: OriginFor<T>,amount: T::Balance) -> DispatchResult {
 			let staker = ensure_signed(origin)?;
 			Self::base_reward(staker,amount)
+		}
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn reserve_to_vault(origin: OriginFor<T>,amount: T::Balance) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			ensure!(amount >= Zero::zero(), Error::<T>::BalanceLow);
+
+			let valut: T::AccountId = Self::account_id();
+			T::Currency::transfer(&who,&valut,amount,AllowDeath)?;
+
+			// Emit an event.
+			Self::deposit_event(Event::ReserveBalance(who, amount));
+			Ok(())
 		}
 	}
 }
