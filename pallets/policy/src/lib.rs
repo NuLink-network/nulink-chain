@@ -5,6 +5,7 @@
 /// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
 
 pub use pallet::*;
+use sp_runtime::DispatchResult;
 
 #[cfg(test)]
 mod mock;
@@ -15,8 +16,19 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
+pub type PolicyID = u128;
+
+#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, MaxEncodedLen)]
+pub struct PolicyInfo<AccountId> {
+	pub(super) pID: PolicyID,
+	pub(super) policyPeriod: u32,
+	pub(super) policyOwner:  AccountId,
+	pub(super) stackers:  Vec<AccountId>,
+}
+
 #[frame_support::pallet]
 pub mod pallet {
+	use super::*;
 	use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
 	use frame_system::pallet_prelude::*;
 
@@ -38,6 +50,13 @@ pub mod pallet {
 	// Learn more about declaring storage items:
 	// https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
 	pub type Something<T> = StorageValue<_, u32>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn policys)]
+	/// Metadata of an staker.
+	pub(super) type Policys<T> = StorageMap<_, Blake2_128Concat, T::AccountId,
+		PolicyInfo<T::AccountId>,
+		ValueQuery>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://substrate.dev/docs/en/knowledgebase/runtime/events
@@ -103,5 +122,11 @@ pub mod pallet {
 				},
 			}
 		}
+	}
+}
+
+impl<T: Config> Pallet<T>  {
+	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,period: u32,stakers: Vec<T::AccountId>) -> DispatchResult {
+		Ok(())
 	}
 }
