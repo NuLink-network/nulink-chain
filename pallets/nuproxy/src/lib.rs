@@ -68,12 +68,14 @@ pub mod pallet {
 	pub(super) type Watchers<T> = StorageMap<_, Blake2_128Concat, T::AccountId, u32, ValueQuery>;
 
 	#[pallet::storage]
+	#[pallet::getter(fn stakers)]
 	/// Metadata of an staker.
 	pub(super) type Stakers<T> = StorageMap<_, Blake2_128Concat, T::Hash,
 		StakeInfo<T::AccountId, T::Balance>,
 		ValueQuery>;
 
 	#[pallet::storage]
+	#[pallet::getter(fn rewards)]
 	/// reserved rewards of the stakers,staker need claim it.
 	pub(super) type Rewards<T> =  StorageMap<_, Blake2_128Concat, T::AccountId, T::Balance, ValueQuery>;
 

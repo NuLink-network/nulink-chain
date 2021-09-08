@@ -54,7 +54,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn policys)]
 	/// Metadata of an staker.
-	pub(super) type Policys<T> = StorageMap<_, Blake2_128Concat, T::AccountId,
+	pub(super) type Polices<T> = StorageMap<_, Blake2_128Concat, PolicyID,
 		PolicyInfo<T::AccountId>,
 		ValueQuery>;
 
@@ -67,6 +67,7 @@ pub mod pallet {
 		/// Event documentation should end with an array that provides descriptive names for event
 		/// parameters. [something, who]
 		SomethingStored(u32, T::AccountId),
+		CreateNewPolicy(PolicyID, T::AccountId),
 	}
 
 	// Errors inform users that something went wrong.
@@ -76,6 +77,8 @@ pub mod pallet {
 		NoneValue,
 		/// Errors should have helpful documentation associated with them.
 		StorageOverflow,
+		/// Repeat Policy ID
+		RepeatPolicyID,
 	}
 
 	#[pallet::hooks]
@@ -127,6 +130,18 @@ pub mod pallet {
 
 impl<T: Config> Pallet<T>  {
 	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,period: u32,stakers: Vec<T::AccountId>) -> DispatchResult {
+		ensure!(!Polices::<T>::contains_key(pid), Error::<T>::RepeatPolicyID);
+		Polices::<T>::insert(pid, PolicyInfo{
+			pID:	pid,
+			policyPeriod: period,
+			policyOwner: owner,
+			stackers: stakers.clone(),
+		});
+		// Emit an event.
+		Self::deposit_event(Event::CreateNewPolicy(pid, owner.clone()));
+		Ok(())
+	}
+	pub fn base_revoke_policy() -> DispatchResult {
 		Ok(())
 	}
 }
