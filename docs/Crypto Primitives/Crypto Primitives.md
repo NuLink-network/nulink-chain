@@ -2,7 +2,7 @@
 sort: 1
 ---
 
-#Proxy Re-encryption (PRE)
+# Proxy Re-encryption (PRE)
 ***
 Proxy re-encryption (PRE) is a type of public-key encryption (PKE) that allows a proxy entity to transform or re-encrypt data from one public key to another, without having access to the underlying plaintext or private keys.
 The operation process of proxy re-encryption is as follows: 
