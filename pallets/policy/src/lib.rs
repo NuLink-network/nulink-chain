@@ -19,9 +19,10 @@ mod benchmarking;
 pub type PolicyID = u128;
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, MaxEncodedLen)]
-pub struct PolicyInfo<AccountId> {
+pub struct PolicyInfo<AccountId,BlockNumber> {
 	pub(super) pID: PolicyID,
-	pub(super) policyPeriod: u32,
+	pub(super) policyPeriod: BlockNumber,
+	pub(super) policyStop: BlockNumber,
 	pub(super) policyOwner:  AccountId,
 	pub(super) stackers:  Vec<AccountId>,
 }
@@ -55,7 +56,7 @@ pub mod pallet {
 	#[pallet::getter(fn policys)]
 	/// Metadata of an staker.
 	pub(super) type Polices<T> = StorageMap<_, Blake2_128Concat, PolicyID,
-		PolicyInfo<T::AccountId>,
+		PolicyInfo<T::AccountId,T::BlockNumber>,
 		ValueQuery>;
 
 	// Pallets use events to inform users when important changes are made.
@@ -79,6 +80,10 @@ pub mod pallet {
 		StorageOverflow,
 		/// Repeat Policy ID
 		RepeatPolicyID,
+		/// Not found the Policy
+		NotFoundPolicyID,
+		/// the policy over period
+		PolicyOverPeriod,
 	}
 
 	#[pallet::hooks]
@@ -129,11 +134,13 @@ pub mod pallet {
 }
 
 impl<T: Config> Pallet<T>  {
+	///
 	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,period: u32,stakers: Vec<T::AccountId>) -> DispatchResult {
 		ensure!(!Polices::<T>::contains_key(pid), Error::<T>::RepeatPolicyID);
 		Polices::<T>::insert(pid, PolicyInfo{
 			pID:	pid,
-			policyPeriod: period,
+			policyPeriod: period + frame_system::Pallet::<T>::block_number(),
+			policyStop: period + frame_system::Pallet::<T>::block_number(),
 			policyOwner: owner,
 			stackers: stakers.clone(),
 		});
@@ -141,7 +148,16 @@ impl<T: Config> Pallet<T>  {
 		Self::deposit_event(Event::CreateNewPolicy(pid, owner.clone()));
 		Ok(())
 	}
-	pub fn base_revoke_policy() -> DispatchResult {
-		Ok(())
+	pub fn base_revoke_policy(pid: PolicyID,owner: T::AccountId) -> DispatchResult {
+		ensure!(Polices::<T>::contains_key(pid), Error::<T>::NotFoundPolicyID);
+		Polices::<T>::try_mutate(pid,|policy| -> DispatchResult{
+			let cur = frame_system::Pallet::<T>::block_number();
+			if policy.policyStop > cur {
+				policy.policyStop = cur;
+				Ok(())
+			} else {
+				Error::<T>::PolicyOverPeriod.into()
+			}
+		})
 	}
 }
