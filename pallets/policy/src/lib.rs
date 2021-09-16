@@ -130,12 +130,24 @@ pub mod pallet {
 				},
 			}
 		}
+
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn crate_policy(origin: OriginFor<T>,pid: PolicyID,
+		period: T::BlockNumber,stakers: Vec<T::AccountId>) -> DispatchResult {
+			let owner = ensure_signed(origin)?;
+			Self::base_create_policy(owner,pid,period,stakers)
+		}
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn revoke_policy(origin: OriginFor<T>,pid: PolicyID) -> DispatchResult {
+			let owner = ensure_signed(origin)?;
+			Self::base_revoke_policy(pid,owner)
+		}
 	}
 }
 
 impl<T: Config> Pallet<T>  {
 	///
-	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,period: u32,stakers: Vec<T::AccountId>) -> DispatchResult {
+	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,period: T::BlockNumber,stakers: Vec<T::AccountId>) -> DispatchResult {
 		ensure!(!Polices::<T>::contains_key(pid), Error::<T>::RepeatPolicyID);
 		Polices::<T>::insert(pid, PolicyInfo{
 			pID:	pid,
