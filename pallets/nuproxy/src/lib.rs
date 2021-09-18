@@ -26,6 +26,7 @@ use frame_support::{
 };
 use parity_scale_codec::Joiner;
 use sp_runtime::traits::AccountIdConversion;
+use crate::types::BasePolicy;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -73,6 +74,11 @@ pub mod pallet {
 	pub(super) type Stakers<T> = StorageMap<_, Blake2_128Concat, T::Hash,
 		StakeInfo<T::AccountId, T::Balance>,
 		ValueQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn policy_reserve)]
+	/// reserve asset for policy assigned to the stakers
+	pub(super) type PolicyReserve<T> =  StorageMap<_, Blake2_128Concat, u128, T::Balance, ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn rewards)]
@@ -262,5 +268,33 @@ impl<T: Config> Pallet<T>  {
 			let valut: T::AccountId = Self::account_id();
 			T::Currency::transfer(&valut,&staker,amount,AllowDeath)
 		})
+	}
+	pub fn coinbase_to_staker_key(accounts: Vec<T::AccountId>) -> Vec<T::Hash> {
+		let all_keys = Stakers::<T>::iter_keys().collect::<Vec<_>>();
+		let keys: Vec<_> = Stakers::<T>::iter()
+			.filter(|&(_,val)| accounts.into_iter().find(|x|x==val.coinbase).is_some())
+			.map(|(i,val)| {
+				all_keys[i].clone()
+			})
+			.collect();
+		keys
+	}
+}
+
+impl<T: Config> BasePolicy<T::AccountId,T::Balance,T::PolicyID,T::BlockNumber> for Pallet<T> {
+	/// policy owner will reserve asset(local asset) to the vault when create policy.
+	fn create_policy(who: T::AccountId,amount: T::Balance,pid: T::PolicyID) -> DispatchResult {
+		PolicyReserve::<T>::mutate(pid, |&mut old_balance| -> DispatchResult {
+			old_balance = old_balance.checked_add(&amount)
+				.ok_or(ArithmeticError::Overflow)?;
+			let valut: T::AccountId = Self::account_id();
+			T::Currency::transfer(&who,&valut,amount,AllowDeath)
+		})
+	}
+	fn set_work_count_by_owner(pid: PolicyID,stakers: Vec<AccountId>) -> DispatchResult {
+		Ok(())
+	}
+	fn revoke_policy(who: AccountId,pid: PolicyID,begin: BlockNumber,end: BlockNumber) -> DispatchResult {
+		Ok(())
 	}
 }

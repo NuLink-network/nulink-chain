@@ -149,6 +149,8 @@ impl<T: Config> Pallet<T>  {
 	///
 	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,period: T::BlockNumber,stakers: Vec<T::AccountId>) -> DispatchResult {
 		ensure!(!Polices::<T>::contains_key(pid), Error::<T>::RepeatPolicyID);
+		// reserve the asset
+
 		Polices::<T>::insert(pid, PolicyInfo{
 			pID:	pid,
 			policyPeriod: period + frame_system::Pallet::<T>::block_number(),
@@ -158,6 +160,7 @@ impl<T: Config> Pallet<T>  {
 		});
 		// Emit an event.
 		Self::deposit_event(Event::CreateNewPolicy(pid, owner.clone()));
+
 		Ok(())
 	}
 	pub fn base_revoke_policy(pid: PolicyID,owner: T::AccountId) -> DispatchResult {
