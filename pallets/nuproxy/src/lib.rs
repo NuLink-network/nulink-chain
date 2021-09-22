@@ -27,6 +27,7 @@ use frame_support::{
 use parity_scale_codec::Joiner;
 use sp_runtime::traits::AccountIdConversion;
 use crate::types::BasePolicy;
+use pallet_policy::{PolicyID,PolicyInfo};
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -115,6 +116,10 @@ pub mod pallet {
 		BalanceZero,
 		/// Vault balance must be greater than or equal to the reward amount
 		VaultBalanceLow,
+		/// low block number for Policy Reward
+		LowBlockNumber,
+		/// not found the reserve for the policy id
+		NoReserve,
 	}
 
 	#[pallet::hooks]
@@ -279,6 +284,51 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		keys
 	}
+	pub fn get_policy_by_pallet(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError> {
+		T::PolicyInfo::get_policy_info_by_pid(pid)
+	}
+	pub fn assigned_by_policy_reward(keys: Vec<T::AccountId>,allAmount: T::Balance) -> DispatchResult {
+		let count = keys.len();
+		let amount = allAmount / count.into();
+		for i in 0..count {
+			Rewards::<T>::mutate(keys[i].clone(),|b| -> DispatchResult {
+				let new_amount = b.saturating_add(amount);
+				*b = *new_amount;
+				Ok(())
+			})
+		}
+		Ok(())
+	}
+	/// calc every policy reward by epoch
+	pub fn calc_reward_in_policy(num: T::BlockNumber,pid: PolicyID) -> DispatchResult {
+		ensure!(PolicyReserve::<T>::contains_key(pid), Error::<T>::NoReserve);
+
+		match Self::get_policy_by_pallet(pid) {
+			Ok(info) => {
+				ensure!(num >= info.policyPeriod, Error::<T>::LowBlockNumber);
+				let range = info.policyStop - info.policyPeriod;
+				let x = num - info.policyPeriod;
+				let reserve = PolicyReserve::<T>::get(pid);
+				let all = reserve * x.into() as u128 / range.into() as u128;
+				Self::assigned_by_policy_reward(info.stackers.clone(),all)?;
+
+				PolicyReserve::<T>::mutate(pid,|x|->DispatchResult {
+					let new_amount = x.saturating_sub(all);
+					*x = *new_amount;
+					Ok(())
+				})
+			},
+			Err(e) => e,
+		}
+	}
+
+	pub fn reward_in_epoch(num: T::BlockNumber) -> DispatchResult {
+		let all_keys = PolicyReserve::<T>::iter_keys().collect::<Vec<_>>();
+		for i in 0..all_keys.len() {
+			Self::calc_reward_in_policy(num,all_keys[i]);
+		}
+		Ok(())
+	}
 }
 
 impl<T: Config> BasePolicy<T::AccountId,T::Balance,T::PolicyID,T::BlockNumber> for Pallet<T> {
@@ -292,6 +342,7 @@ impl<T: Config> BasePolicy<T::AccountId,T::Balance,T::PolicyID,T::BlockNumber> f
 		})
 	}
 	fn set_work_count_by_owner(pid: PolicyID,stakers: Vec<AccountId>) -> DispatchResult {
+
 		Ok(())
 	}
 	fn revoke_policy(who: AccountId,pid: PolicyID,begin: BlockNumber,end: BlockNumber) -> DispatchResult {

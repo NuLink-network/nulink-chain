@@ -5,7 +5,11 @@
 /// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
 
 pub use pallet::*;
-use sp_runtime::DispatchResult;
+
+use sp_runtime::{DispatchResult, traits::{
+	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
+	Saturating, StaticLookup, Zero, Hash,
+}, ArithmeticError, DispatchError};
 
 #[cfg(test)]
 mod mock;
@@ -38,6 +42,8 @@ pub mod pallet {
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		/// The units in which we record balances of the outside's balance value.
+		type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy + MaxEncodedLen;
 	}
 
 	#[pallet::pallet]
@@ -171,8 +177,13 @@ impl<T: Config> Pallet<T>  {
 				policy.policyStop = cur;
 				Ok(())
 			} else {
-				Error::<T>::PolicyOverPeriod.into()
+				Error::<T>::PolicyOverPeriod.into()x
 			}
 		})
+	}
+	pub fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError> {
+		ensure!(Polices::<T>::contains_key(pid), Error::<T>::NotFoundPolicyID);
+		let info = Polices::<T>::get(pid);
+		Ok(info.clone())
 	}
 }
