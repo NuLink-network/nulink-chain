@@ -46,7 +46,7 @@ pub mod pallet {
 		/// The units in which we record balances of the outside's balance value.
 		type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy + MaxEncodedLen;
 		/// the policy handle for pallet nuproxy
-		type PolicyHandle: BasePolicy<Self::Balance,Self::AccountId>;
+		type PolicyHandle: BasePolicy<Self::Balance,Self::AccountId,PolicyID,Self::BlockNumber>;
 
 	}
 
@@ -155,6 +155,10 @@ pub mod pallet {
 	}
 }
 
+pub trait BasePolicyInfo<AccountId,PolicyID,BlockNumber> {
+	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError>;
+}
+
 impl<T: Config> Pallet<T>  {
 	///
 	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,amount: T::Balance,period: T::BlockNumber,
@@ -183,7 +187,7 @@ impl<T: Config> Pallet<T>  {
 				policy.policyStop = cur;
 				Ok(())
 			} else {
-				Error::<T>::PolicyOverPeriod.into()x
+				Error::<T>::PolicyOverPeriod.into()
 			}
 		})
 	}

@@ -27,7 +27,7 @@ use frame_support::{
 use parity_scale_codec::Joiner;
 use sp_runtime::traits::AccountIdConversion;
 use crate::types::BasePolicy;
-use pallet_policy::{PolicyID,PolicyInfo};
+use pallet_policy::{PolicyID,PolicyInfo,BasePolicyInfo};
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -44,6 +44,8 @@ pub mod pallet {
 		type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy + MaxEncodedLen;
 		/// The currency trait.
 		type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
+		/// the policy infos handle for pallet policy
+		type PolicyInfo: BasePolicyInfo<Self::AccountId,PolicyID,Self::BlockNumber>;
 		/// The balance unit for the staker's reward.
 		#[pallet::constant]
 		type RewardUnit: Get<BalanceOf<Self>>;
