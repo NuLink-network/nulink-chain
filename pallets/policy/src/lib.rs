@@ -10,6 +10,7 @@ use sp_runtime::{DispatchResult, traits::{
 	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
 	Saturating, StaticLookup, Zero, Hash,
 }, ArithmeticError, DispatchError};
+use pallet_nuproxy::{BasePolicy};
 
 #[cfg(test)]
 mod mock;
@@ -44,6 +45,9 @@ pub mod pallet {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 		/// The units in which we record balances of the outside's balance value.
 		type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy + MaxEncodedLen;
+		/// the policy handle for pallet nuproxy
+		type PolicyHandle: BasePolicy<Self::Balance,Self::AccountId>;
+
 	}
 
 	#[pallet::pallet]
@@ -153,7 +157,8 @@ pub mod pallet {
 
 impl<T: Config> Pallet<T>  {
 	///
-	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,period: T::BlockNumber,stakers: Vec<T::AccountId>) -> DispatchResult {
+	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,amount: T::Balance,period: T::BlockNumber,
+							  stakers: Vec<T::AccountId>) -> DispatchResult {
 		ensure!(!Polices::<T>::contains_key(pid), Error::<T>::RepeatPolicyID);
 		// reserve the asset
 
@@ -164,6 +169,7 @@ impl<T: Config> Pallet<T>  {
 			policyOwner: owner,
 			stackers: stakers.clone(),
 		});
+		T::PolicyHandle::create_policy(owner.clone(),amount,pid)?;
 		// Emit an event.
 		Self::deposit_event(Event::CreateNewPolicy(pid, owner.clone()));
 
