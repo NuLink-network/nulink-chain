@@ -144,11 +144,13 @@ pub mod pallet {
 				},
 			}
 		}
+		/// update the staker infos and calc reward by epoch with the called by watchers
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn set_staker_infos_and_mint(origin: OriginFor<T>,
+		pub fn update_staker_infos_and_mint(origin: OriginFor<T>,
 							   infos: Vec<StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
 
 			Self::mint_by_staker(Self::calc_reward_by_epoch())?;
+			Self::reward_in_epoch(frame_system::Pallet::<T>::block_number())?;
 			Self::update_stakers(infos)
 		}
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
