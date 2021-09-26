@@ -46,7 +46,7 @@ pub mod pallet {
 		/// The units in which we record balances of the outside's balance value.
 		type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy + MaxEncodedLen;
 		/// the policy handle for pallet nuproxy
-		type PolicyHandle: BasePolicy<Self::Balance,Self::AccountId,PolicyID,Self::BlockNumber>;
+		type PolicyHandle: BasePolicy<Self::Balance,Self::AccountId,PolicyID>;
 
 	}
 

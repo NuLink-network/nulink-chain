@@ -335,7 +335,7 @@ impl<T: Config> Pallet<T>  {
 	}
 }
 
-impl<T: Config> BasePolicy<T::AccountId,T::Balance,T::PolicyID,T::BlockNumber> for Pallet<T> {
+impl<T: Config> BasePolicy<T::AccountId,T::Balance,T::PolicyID> for Pallet<T> {
 	/// policy owner will reserve asset(local asset) to the vault when create policy.
 	fn create_policy(who: T::AccountId,amount: T::Balance,pid: T::PolicyID) -> DispatchResult {
 		PolicyReserve::<T>::mutate(pid, |&mut old_balance| -> DispatchResult {
@@ -344,12 +344,5 @@ impl<T: Config> BasePolicy<T::AccountId,T::Balance,T::PolicyID,T::BlockNumber> f
 			let valut: T::AccountId = Self::account_id();
 			T::Currency::transfer(&who,&valut,amount,AllowDeath)
 		})
-	}
-	fn set_work_count_by_owner(pid: PolicyID,stakers: Vec<AccountId>) -> DispatchResult {
-
-		Ok(())
-	}
-	fn revoke_policy(who: AccountId,pid: PolicyID,begin: BlockNumber,end: BlockNumber) -> DispatchResult {
-		Ok(())
 	}
 }

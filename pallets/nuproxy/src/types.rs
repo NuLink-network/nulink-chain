@@ -19,9 +19,7 @@ pub struct StakeInfo<Balance,AccountId> {
     pub(super) workcount:   u32,
 }
 
-pub trait BasePolicy<AccountId,Balance,PolicyID,BlockNumber> {
+pub trait BasePolicy<AccountId,Balance,PolicyID> {
     /// the user create policy and reserve a asset into the vault.
     fn create_policy(who: AccountId,amount: Balance,pid: PolicyID) -> DispatchResult;
-    fn set_work_count_by_owner(pid: PolicyID,stakers: Vec<AccountId>) -> DispatchResult;
-    fn revoke_policy(who: AccountId,pid: PolicyID,begin: BlockNumber,end: BlockNumber) -> DispatchResult;
 }
