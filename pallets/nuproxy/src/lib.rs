@@ -122,6 +122,8 @@ pub mod pallet {
 		LowBlockNumber,
 		/// not found the reserve for the policy id
 		NoReserve,
+		/// watcher not exist
+		NoWatcher,
 	}
 
 	#[pallet::hooks]
@@ -150,6 +152,8 @@ pub mod pallet {
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn update_staker_infos_and_mint(origin: OriginFor<T>,
 							   infos: Vec<StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
+			let watcher = ensure_signed(origin)?;
+			ensure!(Self::exist_watcher(watcher), Error::<T>::NoWatcher);
 
 			Self::mint_by_staker(Self::calc_reward_by_epoch())?;
 			Self::reward_in_epoch(frame_system::Pallet::<T>::block_number())?;
@@ -313,7 +317,10 @@ impl<T: Config> Pallet<T>  {
 				let range = info.policyStop - info.policyPeriod;
 				let x = num - info.policyPeriod;
 				let reserve = PolicyReserve::<T>::get(pid);
-				let all = reserve * x.into() as u128 / range.into() as u128;
+				let mut all = reserve * x.into() as u128 / range.into() as u128;
+				if all > reserve {
+					all = reserve;
+				}
 				Self::assigned_by_policy_reward(info.stackers.clone(),all)?;
 
 				PolicyReserve::<T>::mutate(pid,|x|->DispatchResult {
