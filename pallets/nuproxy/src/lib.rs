@@ -81,7 +81,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn policy_reserve)]
 	/// reserve asset for policy assigned to the stakers
-	pub(super) type PolicyReserve<T> =  StorageMap<_, Blake2_128Concat, u128, T::Balance, ValueQuery>;
+	pub(super) type PolicyReserve<T> =  StorageMap<_, Blake2_128Concat, u128, (T::AccountId,T::Balance,bool), ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn rewards)]
@@ -122,6 +122,7 @@ pub mod pallet {
 		LowBlockNumber,
 		/// not found the reserve for the policy id
 		NoReserve,
+		RepeatReserve,
 		/// watcher not exist
 		NoWatcher,
 	}
@@ -316,18 +317,28 @@ impl<T: Config> Pallet<T>  {
 				ensure!(num >= info.policyPeriod, Error::<T>::LowBlockNumber);
 				let range = info.policyStop - info.policyPeriod;
 				let x = num - info.policyPeriod;
-				let reserve = PolicyReserve::<T>::get(pid);
-				let mut all = reserve * x.into() as u128 / range.into() as u128;
-				if all > reserve {
-					all = reserve;
-				}
-				Self::assigned_by_policy_reward(info.stackers.clone(),all)?;
+				if let Some((_,reserve,stop)) = PolicyReserve::<T>::get(pid) {
 
-				PolicyReserve::<T>::mutate(pid,|x|->DispatchResult {
-					let new_amount = x.saturating_sub(all);
-					*x = *new_amount;
-					Ok(())
-				})
+					if stop {
+						/// user was revoke the policy and stop it
+						return Ok(())
+					}
+					let mut all = reserve * x.into() as u128 / range.into() as u128;
+					if all > reserve {
+						all = reserve;
+					}
+
+					Self::assigned_by_policy_reward(info.stackers.clone(),all)?;
+
+					PolicyReserve::<T>::mutate(pid,|x|->DispatchResult {
+						let new_amount = x.1.saturating_sub(all);
+						*x.1 = *new_amount;
+						*x.2 = true;
+						Ok(())
+					})
+				} else {
+					Err(Error::<T>::NoReserve)?
+				}
 			},
 			Err(e) => e,
 		}
@@ -345,9 +356,10 @@ impl<T: Config> Pallet<T>  {
 impl<T: Config> BasePolicy<T::AccountId,T::Balance,T::PolicyID> for Pallet<T> {
 	/// policy owner will reserve asset(local asset) to the vault when create policy.
 	fn create_policy(who: T::AccountId,amount: T::Balance,pid: T::PolicyID) -> DispatchResult {
+		ensure!(!PolicyReserve::<T>::contains_key(pid), Error::<T>::RepeatReserve);
+
 		PolicyReserve::<T>::mutate(pid, |&mut old_balance| -> DispatchResult {
-			old_balance = old_balance.checked_add(&amount)
-				.ok_or(ArithmeticError::Overflow)?;
+			*old_balance = (who,amount,false);
 			let valut: T::AccountId = Self::account_id();
 			T::Currency::transfer(&who,&valut,amount,AllowDeath)
 		})
