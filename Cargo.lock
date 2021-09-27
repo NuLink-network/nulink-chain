@@ -3747,7 +3747,7 @@ dependencies = [
  "pallet-grandpa",
  "pallet-randomness-collective-flip",
  "pallet-sudo",
- "pallet-template",
+ "pallet-utils",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
@@ -4041,7 +4041,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-template"
+name = "pallet-utils"
 version = "3.0.0"
 dependencies = [
  "frame-benchmarking",
