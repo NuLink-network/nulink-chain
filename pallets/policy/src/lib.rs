@@ -153,3 +153,8 @@ impl<T: Config> Pallet<T>  {
 		Ok(info.clone())
 	}
 }
+impl<T: Config> BasePolicyInfo<T::AccountId,PolicyID,T::BlockNumber> for Pallet<T> {
+	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError> {
+		Self::get_policy_info_by_pid(pid)
+	}
+}
