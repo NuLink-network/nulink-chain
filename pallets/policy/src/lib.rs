@@ -10,7 +10,7 @@ use sp_runtime::{DispatchResult, traits::{
 	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
 	Saturating, StaticLookup, Zero, Hash,
 }, ArithmeticError, DispatchError};
-use pallet_nuproxy::{BasePolicy};
+use pallet_utils::{BasePolicy,PolicyID,PolicyInfo};
 
 #[cfg(test)]
 mod mock;
@@ -21,16 +21,16 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-pub type PolicyID = u128;
-
-#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, MaxEncodedLen)]
-pub struct PolicyInfo<AccountId,BlockNumber> {
-	pub(super) pID: PolicyID,
-	pub(super) policyPeriod: BlockNumber,
-	pub(super) policyStop: BlockNumber,
-	pub(super) policyOwner:  AccountId,
-	pub(super) stackers:  Vec<AccountId>,
-}
+// pub type PolicyID = u128;
+//
+// #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, MaxEncodedLen)]
+// pub struct PolicyInfo<AccountId,BlockNumber> {
+// 	pub(super) pID: PolicyID,
+// 	pub(super) policyPeriod: BlockNumber,
+// 	pub(super) policyStop: BlockNumber,
+// 	pub(super) policyOwner:  AccountId,
+// 	pub(super) stackers:  Vec<AccountId>,
+// }
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -111,9 +111,9 @@ pub mod pallet {
 	}
 }
 
-pub trait BasePolicyInfo<AccountId,PolicyID,BlockNumber> {
-	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError>;
-}
+// pub trait BasePolicyInfo<AccountId,PolicyID,BlockNumber> {
+// 	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError>;
+// }
 
 impl<T: Config> Pallet<T>  {
 	///

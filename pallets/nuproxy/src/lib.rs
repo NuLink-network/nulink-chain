@@ -27,7 +27,7 @@ use frame_support::{
 use parity_scale_codec::Joiner;
 use sp_runtime::traits::AccountIdConversion;
 use crate::types::BasePolicy;
-use pallet_policy::{PolicyID,PolicyInfo,BasePolicyInfo};
+use pallet_utils::{PolicyID,PolicyInfo,BasePolicyInfo};
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -45,7 +45,7 @@ pub mod pallet {
 		/// The currency trait.
 		type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
 		/// the policy infos handle for pallet policy
-		type PolicyInfo: BasePolicyInfo<Self::AccountId,PolicyID,Self::BlockNumber>;
+		type GetPolicyInfo: BasePolicyInfo<Self::AccountId,PolicyID,Self::BlockNumber>;
 		/// The balance unit for the staker's reward.
 		#[pallet::constant]
 		type RewardUnit: Get<BalanceOf<Self>>;
@@ -294,7 +294,7 @@ impl<T: Config> Pallet<T>  {
 		keys
 	}
 	pub fn get_policy_by_pallet(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError> {
-		T::PolicyInfo::get_policy_info_by_pid(pid)
+		T::GetPolicyInfo::get_policy_info_by_pid(pid)
 	}
 	pub fn assigned_by_policy_reward(keys: Vec<T::AccountId>,allAmount: T::Balance) -> DispatchResult {
 		let count = keys.len();
