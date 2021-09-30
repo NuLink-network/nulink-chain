@@ -18,8 +18,3 @@ pub struct StakeInfo<Balance,AccountId> {
     pub(super) lockedBalance:  Balance,
     pub(super) workcount:   u32,
 }
-
-// pub trait BasePolicy<AccountId,Balance,PolicyID> {
-//     /// the user create policy and reserve a asset into the vault.
-//     fn create_policy(who: AccountId,amount: Balance,pid: PolicyID) -> DispatchResult;
-// }
