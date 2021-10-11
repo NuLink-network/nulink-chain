@@ -27,7 +27,7 @@ use frame_support::{
 use parity_scale_codec::Joiner;
 use sp_runtime::traits::AccountIdConversion;
 use crate::types::BasePolicy;
-use pallet_utils::{PolicyID,PolicyInfo,BasePolicyInfo};
+use nulink_utils::{PolicyID,PolicyInfo,BasePolicyInfo};
 
 #[frame_support::pallet]
 pub mod pallet {

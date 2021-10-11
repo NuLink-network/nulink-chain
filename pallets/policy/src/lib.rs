@@ -10,7 +10,7 @@ use sp_runtime::{DispatchResult, traits::{
 	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
 	Saturating, StaticLookup, Zero, Hash,
 }, ArithmeticError, DispatchError};
-use pallet_utils::{BasePolicy,PolicyID,PolicyInfo};
+use nulink_utils::{BasePolicy,PolicyID,PolicyInfo};
 
 #[cfg(test)]
 mod mock;

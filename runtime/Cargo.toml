@@ -45,7 +45,7 @@ sp-transaction-pool = {default-features = false, version = '3.0.0', git = 'https
 sp-version = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 
 # local dependencies
-pallet-utils = {default-features = false, version = '3.0.0', path = '../pallets/utils' }
+#nulink-utils = {default-features = false,version = '3.0.0', path = '../pallets/utils' }
 
 [features]
 default = ['std']
