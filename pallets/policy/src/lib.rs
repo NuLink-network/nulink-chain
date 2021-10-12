@@ -110,8 +110,9 @@ impl<T: Config> Pallet<T>  {
 
 		Polices::<T>::insert(pid, PolicyInfo{
 			pID:	pid.clone(),
-			policyPeriod: period + frame_system::Pallet::<T>::block_number(),
-			policyStop: period + frame_system::Pallet::<T>::block_number(),
+			period: period,
+			policyStart: One::one() + frame_system::Pallet::<T>::block_number(),
+			policyStop: One::one() + period + frame_system::Pallet::<T>::block_number(),
 			policyOwner: owner,
 			stackers: stakers.clone(),
 		});
@@ -123,14 +124,13 @@ impl<T: Config> Pallet<T>  {
 	}
 	pub fn base_revoke_policy(pid: PolicyID,owner: T::AccountId) -> DispatchResult {
 		ensure!(Polices::<T>::contains_key(pid), Error::<T>::NotFoundPolicyID);
+
 		Polices::<T>::try_mutate(pid,|policy| -> DispatchResult{
 			let cur = frame_system::Pallet::<T>::block_number();
-			if policy.policyStop > cur {
-				policy.policyStop = cur;
-				Ok(())
-			} else {
-				Error::<T>::PolicyOverPeriod.into()
-			}
+			ensure!(cur > policy.policyStart, Error::<T>::PolicyOverPeriod);
+			ensure!(policy.policyStop >= cur, Error::<T>::PolicyOverPeriod);
+			policy.policyStop = cur;
+			Ok(())
 		})
 	}
 	pub fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError> {
@@ -139,6 +139,7 @@ impl<T: Config> Pallet<T>  {
 		Ok(info.clone())
 	}
 }
+
 impl<T: Config> BasePolicyInfo<T::AccountId,PolicyID,T::BlockNumber> for Pallet<T> {
 	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError> {
 		Self::get_policy_info_by_pid(pid)

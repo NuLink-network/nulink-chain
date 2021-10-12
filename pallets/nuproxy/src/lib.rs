@@ -81,7 +81,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn policy_reserve)]
 	/// reserve asset for policy assigned to the stakers
-	pub(super) type PolicyReserve<T> =  StorageMap<_, Blake2_128Concat, u128, (T::AccountId,T::Balance,bool), ValueQuery>;
+	pub(super) type PolicyReserve<T> =  StorageMap<_, Blake2_128Concat, u128, (T::AccountId,T::Balance,T::BlockNumber), ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn rewards)]
@@ -314,16 +314,23 @@ impl<T: Config> Pallet<T>  {
 
 		match Self::get_policy_by_pallet(pid) {
 			Ok(info) => {
-				ensure!(num >= info.policyPeriod, Error::<T>::LowBlockNumber);
-				let range = info.policyStop - info.policyPeriod;
-				let x = num - info.policyPeriod;
-				if let Some((_,reserve,stop)) = PolicyReserve::<T>::get(pid) {
+				ensure!(num >= info.policyStart, Error::<T>::LowBlockNumber);
+				let range = info.period;
 
-					if stop {
+				if let Some((_,reserve,last)) = PolicyReserve::<T>::get(pid) {
+					let mut lastAssign = last;
+					if lastAssign == Zero::zero() {
+						lastAssign = info.policyStart
+					}
+					ensure!(num >= lastAssign, Error::<T>::LowBlockNumber);
+					let useblock = num - lastAssign;
+
+					if lastAssign >= info.policyStop || useblock == Zero::zero() {
 						/// user was revoke the policy and stop it
 						return Ok(())
 					}
-					let mut all = reserve * x.into() as u128 / range.into() as u128;
+
+					let mut all = reserve * useblock.into() as u128 / range.into() as u128;
 					if all > reserve {
 						all = reserve;
 					}
@@ -333,7 +340,7 @@ impl<T: Config> Pallet<T>  {
 					PolicyReserve::<T>::mutate(pid,|x|->DispatchResult {
 						let new_amount = x.1.saturating_sub(all);
 						*x.1 = *new_amount;
-						*x.2 = true;
+						*x.2 = num;
 						Ok(())
 					})
 				} else {
@@ -359,7 +366,7 @@ impl<T: Config> BasePolicy<T::AccountId,T::Balance,T::PolicyID> for Pallet<T> {
 		ensure!(!PolicyReserve::<T>::contains_key(pid), Error::<T>::RepeatReserve);
 
 		PolicyReserve::<T>::mutate(pid, |&mut old_balance| -> DispatchResult {
-			*old_balance = (who,amount,false);
+			*old_balance = (who,amount,Zero::zero());
 			let valut: T::AccountId = Self::account_id();
 			T::Currency::transfer(&who,&valut,amount,AllowDeath)
 		})
