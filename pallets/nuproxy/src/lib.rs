@@ -139,20 +139,13 @@ pub mod pallet {
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn set_watcher(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			match <Watchers<T>>::get(who.clone()) {
-				None => {
-					<Watchers<T>>::insert(who.clone(),1);
-					Ok(())
-				},
-				Some(val) => {
-					Err(Error::<T>::AlreadyExist)?
-				},
-			}
+			ensure!(!Self::exist_watcher(who.clone()),Error::<T>::AlreadyExist);
+			<Watchers<T>>::insert(who.clone(),1);
+			Ok(())
 		}
 		/// update the staker infos and calc reward by epoch with the called by watchers
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn update_staker_infos_and_mint(origin: OriginFor<T>,
-							   infos: Vec<StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
+		pub fn update_staker_infos_and_mint(origin: OriginFor<T>,infos: Vec<StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
 			let watcher = ensure_signed(origin)?;
 			ensure!(Self::exist_watcher(watcher), Error::<T>::NoWatcher);
 
