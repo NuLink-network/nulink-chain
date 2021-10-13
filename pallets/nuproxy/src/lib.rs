@@ -26,8 +26,8 @@ use frame_support::{
 };
 
 use codec::MaxEncodedLen;
-use crate::types::BasePolicy;
-use nulink_utils::{PolicyID,PolicyInfo,GetPolicyInfo};
+use crate::types::BalanceOf;
+use nulink_utils::{PolicyID,PolicyInfo,GetPolicyInfo,BasePolicy};
 
 #[frame_support::pallet]
 pub mod pallet {
