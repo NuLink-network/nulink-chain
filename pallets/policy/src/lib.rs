@@ -6,10 +6,11 @@
 
 pub use pallet::*;
 
-use sp_runtime::{DispatchResult, traits::{
+use sp_runtime::{traits::{
 	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
 	Saturating, StaticLookup, Zero, Hash,
 }, ArithmeticError, DispatchError};
+use frame_support::{ensure,dispatch::DispatchResult, pallet_prelude::*};
 use nulink_utils::{BasePolicy,PolicyID,PolicyInfo};
 
 #[cfg(test)]
@@ -25,7 +26,7 @@ mod benchmarking;
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
+
 	use frame_system::pallet_prelude::*;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
