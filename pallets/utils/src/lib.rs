@@ -22,7 +22,7 @@ pub struct PolicyInfo<AccountId,BlockNumber> {
 }
 
 
-pub trait BasePolicyInfo<AccountId,PolicyID,BlockNumber> {
+pub trait GetPolicyInfo<AccountId,PolicyID,BlockNumber> {
 	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError>;
 }
 

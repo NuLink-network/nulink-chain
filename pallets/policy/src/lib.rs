@@ -12,7 +12,7 @@ use sp_runtime::{traits::{
 }, DispatchError};
 use frame_support::{ensure,dispatch::DispatchResult, pallet_prelude::*};
 use codec::MaxEncodedLen;
-use nulink_utils::{BasePolicy,PolicyID,PolicyInfo};
+use nulink_utils::{BasePolicy,GetPolicyInfo,PolicyID,PolicyInfo};
 
 #[cfg(test)]
 mod mock;
@@ -49,7 +49,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn policys)]
 	/// Metadata of an staker.
-	pub(super) type Polices<T> = StorageMap<_, Blake2_128Concat, PolicyID,
+	pub type Polices<T: Config> = StorageMap<_, Blake2_128Concat, PolicyID,
 		PolicyInfo<T::AccountId,T::BlockNumber>,
 		ValueQuery>;
 
@@ -89,10 +89,10 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T:Config> Pallet<T> {
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn create_policy(origin: OriginFor<T>,pid: PolicyID,
+		pub fn create_policy(origin: OriginFor<T>,pid: PolicyID,amount: T::Balance,
 		period: T::BlockNumber,stakers: Vec<T::AccountId>) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
-			Self::base_create_policy(owner,pid,period,stakers)
+			Self::base_create_policy(owner,pid,amount,period,stakers)
 		}
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn revoke_policy(origin: OriginFor<T>,pid: PolicyID) -> DispatchResult {
@@ -141,7 +141,7 @@ impl<T: Config> Pallet<T>  {
 	}
 }
 
-impl<T: Config> BasePolicyInfo<T::AccountId,PolicyID,T::BlockNumber> for Pallet<T> {
+impl<T: Config> GetPolicyInfo<T::AccountId,PolicyID,T::BlockNumber> for Pallet<T> {
 	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
 		Self::get_policy_info_by_pid(pid)
 	}

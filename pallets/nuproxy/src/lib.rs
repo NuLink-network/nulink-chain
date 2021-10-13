@@ -27,7 +27,7 @@ use frame_support::{
 
 use codec::MaxEncodedLen;
 use crate::types::BasePolicy;
-use nulink_utils::{PolicyID,PolicyInfo,BasePolicyInfo};
+use nulink_utils::{PolicyID,PolicyInfo,GetPolicyInfo};
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -45,7 +45,7 @@ pub mod pallet {
 		/// The currency trait.
 		type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
 		/// the policy infos handle for pallet policy
-		type GetPolicyInfo: BasePolicyInfo<Self::AccountId,PolicyID,Self::BlockNumber>;
+		type GetPolicyInfo: GetPolicyInfo<Self::AccountId,PolicyID,Self::BlockNumber>;
 		/// The balance unit for the staker's reward.
 		#[pallet::constant]
 		type RewardUnit: Get<BalanceOf<Self>>;
