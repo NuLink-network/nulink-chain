@@ -69,24 +69,24 @@ pub mod pallet {
 	// the wather can only start working after registration
 	#[pallet::storage]
 	#[pallet::getter(fn watchers)]
-	pub(super) type Watchers<T> = StorageMap<_, Blake2_128Concat, T::AccountId, u32, ValueQuery>;
+	pub(super) type Watchers<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, u32, ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn stakers)]
 	/// Metadata of an staker.
-	pub(super) type Stakers<T> = StorageMap<_, Blake2_128Concat, T::Hash,
+	pub(super) type Stakers<T: Config> = StorageMap<_, Blake2_128Concat, T::Hash,
 		StakeInfo<T::AccountId, T::Balance>,
 		ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn policy_reserve)]
 	/// reserve asset for policy assigned to the stakers
-	pub(super) type PolicyReserve<T> =  StorageMap<_, Blake2_128Concat, u128, (T::AccountId,T::Balance,T::BlockNumber), ValueQuery>;
+	pub(super) type PolicyReserve<T: Config> =  StorageMap<_, Blake2_128Concat, u128, (T::AccountId,T::Balance,T::BlockNumber), ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn rewards)]
 	/// reserved rewards of the stakers,staker need claim it.
-	pub(super) type Rewards<T> =  StorageMap<_, Blake2_128Concat, T::AccountId, T::Balance, ValueQuery>;
+	pub(super) type Rewards<T: Config> =  StorageMap<_, Blake2_128Concat, T::AccountId, T::Balance, ValueQuery>;
 
 
 	// Pallets use events to inform users when important changes are made.
