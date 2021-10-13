@@ -16,16 +16,16 @@ mod types;
 pub use pallet::*;
 use sp_runtime::{traits::{
 	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
-	Saturating, StaticLookup, Zero,Hash,
-}, ArithmeticError};
+	Saturating, StaticLookup, Zero,Hash,AccountIdConversion,
+}};
 pub use types::{StakeInfo};
 use frame_support::{
 	ensure,
 	traits::{Get,ReservableCurrency, ExistenceRequirement::AllowDeath, Currency},
 	dispatch::DispatchResult, pallet_prelude::*, PalletId
 };
-use parity_scale_codec::Joiner;
-use sp_runtime::traits::AccountIdConversion;
+
+use codec::MaxEncodedLen;
 use crate::types::BasePolicy;
 use nulink_utils::{PolicyID,PolicyInfo,BasePolicyInfo};
 

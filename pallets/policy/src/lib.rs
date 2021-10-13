@@ -9,8 +9,9 @@ pub use pallet::*;
 use sp_runtime::{traits::{
 	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
 	Saturating, StaticLookup, Zero, Hash,
-}, ArithmeticError, DispatchError};
+}, DispatchError};
 use frame_support::{ensure,dispatch::DispatchResult, pallet_prelude::*};
+use codec::MaxEncodedLen;
 use nulink_utils::{BasePolicy,PolicyID,PolicyInfo};
 
 #[cfg(test)]
@@ -26,7 +27,6 @@ mod benchmarking;
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-
 	use frame_system::pallet_prelude::*;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -134,7 +134,7 @@ impl<T: Config> Pallet<T>  {
 			Ok(())
 		})
 	}
-	pub fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError> {
+	pub fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
 		ensure!(Polices::<T>::contains_key(pid), Error::<T>::NotFoundPolicyID);
 		let info = Polices::<T>::get(pid);
 		Ok(info.clone())
@@ -142,7 +142,7 @@ impl<T: Config> Pallet<T>  {
 }
 
 impl<T: Config> BasePolicyInfo<T::AccountId,PolicyID,T::BlockNumber> for Pallet<T> {
-	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError> {
+	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
 		Self::get_policy_info_by_pid(pid)
 	}
 }

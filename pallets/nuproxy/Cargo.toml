@@ -23,6 +23,7 @@ sp-runtime = {default-features = false, version = '3.0.0', git = 'https://github
 
 # local dependencies
 nulink-utils = {default-features = false,version = '3.0.0', path = '../utils' }
+pallet-policy = {default-features = false,version = '3.0.0', path = '../policy' }
 
 [dev-dependencies]
 serde = '1.0.119'

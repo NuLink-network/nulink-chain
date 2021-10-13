@@ -3,7 +3,7 @@
 use super::*;
 use frame_support::pallet_prelude::*;
 
-use frame_support::traits::{fungible, tokens::BalanceConversion, Currency};
+use frame_support::traits::{fungible, Currency};
 use sp_runtime::{traits::Convert, FixedPointNumber, FixedPointOperand, FixedU128};
 use pallet_policy::{PolicyID,PolicyInfo};
 
