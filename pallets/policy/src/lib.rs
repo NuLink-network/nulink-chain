@@ -37,7 +37,7 @@ pub mod pallet {
 		/// The units in which we record balances of the outside's balance value.
 		type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy + MaxEncodedLen;
 		/// the policy handle for pallet nuproxy
-		type PolicyHandle: BasePolicy<Self::Balance,Self::AccountId,PolicyID>;
+		type PolicyHandle: BasePolicy<Self::AccountId,Self::Balance,PolicyID>;
 
 	}
 
@@ -112,9 +112,9 @@ impl<T: Config> Pallet<T>  {
 		Polices::<T>::insert(pid, PolicyInfo{
 			pID:	pid.clone(),
 			period: period,
-			policyStart: One::one() + frame_system::Pallet::<T>::block_number(),
-			policyStop: One::one() + period + frame_system::Pallet::<T>::block_number(),
-			policyOwner: owner,
+			policyStart:  frame_system::Pallet::<T>::block_number() + One::one(),
+			policyStop:  period + frame_system::Pallet::<T>::block_number() + One::one(),
+			policyOwner: owner.clone(),
 			stackers: stakers.clone(),
 		});
 		T::PolicyHandle::create_policy(owner.clone(),amount,pid.clone())?;
