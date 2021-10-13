@@ -293,7 +293,7 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		keys
 	}
-	pub fn get_policy_by_pallet(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError> {
+	pub fn get_policy_by_pallet(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
 		T::GetPolicyInfo::get_policy_info_by_pid(pid)
 	}
 	pub fn assigned_by_policy_reward(keys: Vec<T::AccountId>,allAmount: T::Balance) -> DispatchResult {
@@ -360,9 +360,9 @@ impl<T: Config> Pallet<T>  {
 	}
 }
 
-impl<T: Config> BasePolicy<T::AccountId,T::Balance,T::PolicyID> for Pallet<T> {
+impl<T: Config> BasePolicy<T::AccountId,T::Balance,PolicyID> for Pallet<T> {
 	/// policy owner will reserve asset(local asset) to the vault when create policy.
-	fn create_policy(who: T::AccountId,amount: T::Balance,pid: T::PolicyID) -> DispatchResult {
+	fn create_policy(who: T::AccountId,amount: T::Balance,pid: PolicyID) -> DispatchResult {
 		ensure!(!PolicyReserve::<T>::contains_key(pid), Error::<T>::RepeatReserve);
 
 		PolicyReserve::<T>::mutate(pid, |&mut old_balance| -> DispatchResult {

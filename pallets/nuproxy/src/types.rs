@@ -5,7 +5,7 @@ use frame_support::pallet_prelude::*;
 
 use frame_support::traits::{fungible, Currency};
 use sp_runtime::{traits::Convert, FixedPointNumber, FixedPointOperand, FixedU128};
-use pallet_policy::{PolicyID,PolicyInfo};
+
 
 pub type BalanceOf<T> =
 <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
