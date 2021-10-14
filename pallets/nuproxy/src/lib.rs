@@ -283,12 +283,11 @@ impl<T: Config> Pallet<T>  {
 		})
 	}
 	pub fn coinbase_to_staker_key(accounts: Vec<T::AccountId>) -> Vec<T::Hash> {
-		let all_keys = Stakers::<T>::iter_keys().collect::<Vec<_>>();
 		let keys: Vec<_> = Stakers::<T>::iter()
-			.filter(|&(_,val)| accounts.into_iter().find(|x|x==val.coinbase).is_some())
-			.map(|(i,val)| {
-				all_keys[i].clone()
+			.filter(|&(_,val)| {
+				accounts.into_iter().find(|x| *x==val.coinbase ).is_some()
 			})
+			.map(|(x,_)| x )
 			.collect();
 		keys
 	}
