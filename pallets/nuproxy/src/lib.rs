@@ -215,8 +215,13 @@ impl<T: Config> Pallet<T>  {
 		for k in unused { Watchers::<T>::remove(&k); }
 	}
 	pub fn update_stakers(new_stakers: Vec<StakeInfo<T::AccountId,BalanceOf<T>>>) -> DispatchResult {
-		let keys = Stakers::<T>::iter_keys().collect::<Vec<_>>();
-		for key in keys {Stakers::<T>::mutate(key.clone(),|value|{
+
+		let keys = Stakers::<T>::iter()
+			.map(|(x, _)| x)
+			.collect::<Vec<_>>();
+
+		for key in keys {
+			Stakers::<T>::mutate(key.clone(),|value|{
 			value.iswork = false;
 		})}
 		for new_staker in new_stakers {
@@ -242,8 +247,8 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 
 		let count = cur_all_reward.len();
-		let mut all: T::Balance = Zero::zero();
-		let mut left: T::Balance = Zero::zero();
+		let mut all: BalanceOf<T> = Zero::zero();
+		let mut left: BalanceOf<T> = Zero::zero();
 
 		for i in 0..count {
 			if i == count - 1 {
@@ -254,9 +259,9 @@ impl<T: Config> Pallet<T>  {
 			all = all.saturating_add(left.clone());
 			Rewards::<T>::mutate(cur_all_reward[i].0.clone(),|b| -> DispatchResult {
 				let amount = b.saturating_add(left.clone());
-				*b = *amount;
+				*b = amount;
 				Ok(())
-			})
+			});
 		}
 		Ok(())
 	}
