@@ -209,7 +209,7 @@ impl<T: Config> Pallet<T>  {
 	}
 	pub fn remove_unused_watcher() {
 		let unused: Vec<_> = Watchers::<T>::iter()
-			.filter(|&(_, &v)| v == 0)
+			.filter(|&(_, v)| v == 0)
 			.map(|(k, _)| k.clone())
 			.collect();
 		for k in unused { Watchers::<T>::remove(&k); }
