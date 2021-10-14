@@ -296,13 +296,13 @@ impl<T: Config> Pallet<T>  {
 	}
 	pub fn assigned_by_policy_reward(keys: Vec<T::AccountId>,allAmount: BalanceOf<T>) -> DispatchResult {
 		let count = keys.len();
-		let amount = allAmount / count.into();
+		let amount = allAmount / count;
 		for i in 0..count {
 			Rewards::<T>::mutate(keys[i].clone(),|b| -> DispatchResult {
 				let new_amount = b.saturating_add(amount);
-				*b = *new_amount;
+				*b = new_amount;
 				Ok(())
-			})
+			});
 		}
 		Ok(())
 	}
@@ -315,7 +315,7 @@ impl<T: Config> Pallet<T>  {
 				ensure!(num >= info.policyStart, Error::<T>::LowBlockNumber);
 				let range = info.period;
 
-				if let Some((_,reserve,last)) = PolicyReserve::<T>::get(pid) {
+				if let (_,reserve,last) = PolicyReserve::<T>::get(pid) {
 					let mut lastAssign = last;
 					if lastAssign == Zero::zero() {
 						lastAssign = info.policyStart
@@ -337,8 +337,8 @@ impl<T: Config> Pallet<T>  {
 
 					PolicyReserve::<T>::mutate(pid,|x|->DispatchResult {
 						let new_amount = x.1.saturating_sub(all);
-						*x.1 = *new_amount;
-						*x.2 = num;
+						x.1 = new_amount;
+						x.2 = num;
 						Ok(())
 					})
 				} else {
