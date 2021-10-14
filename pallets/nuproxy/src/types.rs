@@ -11,7 +11,7 @@ pub type BalanceOf<T> =
 <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, MaxEncodedLen)]
-pub struct StakeInfo<Balance,AccountId> {
+pub struct StakeInfo<AccountId,Balance> {
     pub(super) coinbase: AccountId,
     pub(super) workbase: [u8;32],
     pub(super) iswork:  bool,

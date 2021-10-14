@@ -75,18 +75,19 @@ pub mod pallet {
 	#[pallet::getter(fn stakers)]
 	/// Metadata of an staker.
 	pub(super) type Stakers<T: Config> = StorageMap<_, Blake2_128Concat, T::Hash,
-		StakeInfo<T::AccountId, T::Balance>,
+		StakeInfo<T::AccountId, BalanceOf<T>>,
 		ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn policy_reserve)]
 	/// reserve asset for policy assigned to the stakers
-	pub(super) type PolicyReserve<T: Config> =  StorageMap<_, Blake2_128Concat, u128, (T::AccountId,T::Balance,T::BlockNumber), ValueQuery>;
+	pub(super) type PolicyReserve<T: Config> =  StorageMap<_, Blake2_128Concat, u128,
+		(T::AccountId,BalanceOf<T>,T::BlockNumber), ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn rewards)]
 	/// reserved rewards of the stakers,staker need claim it.
-	pub(super) type Rewards<T: Config> =  StorageMap<_, Blake2_128Concat, T::AccountId, T::Balance, ValueQuery>;
+	pub(super) type Rewards<T: Config> =  StorageMap<_, Blake2_128Concat, T::AccountId, BalanceOf<T>, ValueQuery>;
 
 
 	// Pallets use events to inform users when important changes are made.
@@ -99,7 +100,7 @@ pub mod pallet {
 		/// parameters. [something, who]
 		SomethingStored(u32, T::AccountId),
 		/// Reserve asset to the vault
-		ReserveBalance(T::AccountId,T::Balance),
+		ReserveBalance(T::AccountId,BalanceOf<T>),
 	}
 
 	// Errors inform users that something went wrong.
@@ -145,7 +146,7 @@ pub mod pallet {
 		}
 		/// update the staker infos and calc reward by epoch with the called by watchers
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn update_staker_infos_and_mint(origin: OriginFor<T>,infos: Vec<StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
+		pub fn update_staker_infos_and_mint(origin: OriginFor<T>,infos: Vec<StakeInfo<T::AccountId,BalanceOf<T>>>) -> DispatchResult {
 			let watcher = ensure_signed(origin)?;
 			ensure!(Self::exist_watcher(watcher), Error::<T>::NoWatcher);
 
@@ -154,12 +155,12 @@ pub mod pallet {
 			Self::update_stakers(infos)
 		}
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn claim_reward_by_staker(origin: OriginFor<T>,amount: T::Balance) -> DispatchResult {
+		pub fn claim_reward_by_staker(origin: OriginFor<T>,amount: BalanceOf<T>) -> DispatchResult {
 			let staker = ensure_signed(origin)?;
 			Self::base_reward(staker,amount)
 		}
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn reserve_to_vault(origin: OriginFor<T>,amount: T::Balance) -> DispatchResult {
+		pub fn reserve_to_vault(origin: OriginFor<T>,amount: BalanceOf<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			ensure!(amount >= Zero::zero(), Error::<T>::BalanceLow);
 
@@ -181,21 +182,21 @@ impl<T: Config> Pallet<T>  {
 	pub fn account_id() -> T::AccountId {
 		T::PalletId::get().into_account()
 	}
-	pub fn vault_balance() -> T::Balance {
+	pub fn vault_balance() -> BalanceOf<T> {
 		let vault = Self::account_id();
 		T::Currency::free_balance(&vault)
 	}
-	pub fn calc_staker_hash(staker: StakeInfo<T::AccountId,T::Balance>) -> T::Hash {
+	pub fn calc_staker_hash(staker: StakeInfo<T::AccountId,BalanceOf<T>>) -> T::Hash {
 		let mut s = staker.clone();
 		s.iswork = false;
 		s.lockedBalance = Zero::zero();
 		T::Hashing::hash_of(&s)
 	}
-	pub fn calc_reward_by_epoch() -> T::Balance {
+	pub fn calc_reward_by_epoch() -> BalanceOf<T> {
 		let unit = T::RewardUnit::get();
 		One::one()
 	}
-	pub fn get_total_staking() -> T::Balance {
+	pub fn get_total_staking() -> BalanceOf<T> {
 		Stakers::<T>::iter()
 			.filter(|&(_,val)| val.iswork)
 			.map(|(_,val)| val.clone())
@@ -213,7 +214,7 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		for k in unused { Watchers::<T>::remove(&k); }
 	}
-	pub fn update_stakers(new_stakers: Vec<StakeInfo<T::AccountId,T::Balance>>) -> DispatchResult {
+	pub fn update_stakers(new_stakers: Vec<StakeInfo<T::AccountId,BalanceOf<T>>>) -> DispatchResult {
 		let keys = Stakers::<T>::iter_keys().collect::<Vec<_>>();
 		for key in keys {Stakers::<T>::mutate(key.clone(),|value|{
 			value.iswork = false;
@@ -230,7 +231,7 @@ impl<T: Config> Pallet<T>  {
 		}
 		Ok(())
 	}
-	pub fn mint_by_staker(all_reward: T::Balance) -> DispatchResult {
+	pub fn mint_by_staker(all_reward: BalanceOf<T>) -> DispatchResult {
 		let total = Self::get_total_staking();
 		let cur_all_reward: Vec<_> = Stakers::<T>::iter()
 			.filter(|&(_,val)| val.iswork)
@@ -259,7 +260,7 @@ impl<T: Config> Pallet<T>  {
 		}
 		Ok(())
 	}
-	pub fn base_reward(staker: T::AccountId,amount: T::Balance) -> DispatchResult {
+	pub fn base_reward(staker: T::AccountId,amount: BalanceOf<T>) -> DispatchResult {
 		ensure!(amount >= Zero::zero(), Error::<T>::BalanceLow);
 
 		if !Rewards::<T>::contains_key(staker.clone()) {
@@ -289,7 +290,7 @@ impl<T: Config> Pallet<T>  {
 	pub fn get_policy_by_pallet(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
 		T::GetPolicyInfo::get_policy_info_by_pid(pid)
 	}
-	pub fn assigned_by_policy_reward(keys: Vec<T::AccountId>,allAmount: T::Balance) -> DispatchResult {
+	pub fn assigned_by_policy_reward(keys: Vec<T::AccountId>,allAmount: BalanceOf<T>) -> DispatchResult {
 		let count = keys.len();
 		let amount = allAmount / count.into();
 		for i in 0..count {
@@ -353,9 +354,9 @@ impl<T: Config> Pallet<T>  {
 	}
 }
 
-impl<T: Config> BasePolicy<T::AccountId,T::Balance,PolicyID> for Pallet<T> {
+impl<T: Config> BasePolicy<T::AccountId,BalanceOf<T>,PolicyID> for Pallet<T> {
 	/// policy owner will reserve asset(local asset) to the vault when create policy.
-	fn create_policy(who: T::AccountId,amount: T::Balance,pid: PolicyID) -> DispatchResult {
+	fn create_policy(who: T::AccountId,amount: BalanceOf<T>,pid: PolicyID) -> DispatchResult {
 		ensure!(!PolicyReserve::<T>::contains_key(pid), Error::<T>::RepeatReserve);
 
 		PolicyReserve::<T>::mutate(pid, |&mut old_balance| -> DispatchResult {
