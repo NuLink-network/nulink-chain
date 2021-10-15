@@ -18,6 +18,7 @@ use sp_runtime::{traits::{
 	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
 	Saturating, StaticLookup, Zero,Hash,AccountIdConversion,
 }};
+use std::convert::TryInto;
 pub use types::{StakeInfo};
 use frame_support::{
 	ensure,
@@ -126,6 +127,8 @@ pub mod pallet {
 		RepeatReserve,
 		/// watcher not exist
 		NoWatcher,
+		InValidPeriod,
+		ConvertFailed,
 	}
 
 	#[pallet::hooks]
@@ -296,7 +299,7 @@ impl<T: Config> Pallet<T>  {
 	}
 	pub fn assigned_by_policy_reward(keys: Vec<T::AccountId>,allAmount: BalanceOf<T>) -> DispatchResult {
 		let count = keys.len();
-		let amount = allAmount / count;
+		let amount = allAmount / <BalanceOf<T>>::from(count  as u32);
 		for i in 0..count {
 			Rewards::<T>::mutate(keys[i].clone(),|b| -> DispatchResult {
 				let new_amount = b.saturating_add(amount);
@@ -313,7 +316,8 @@ impl<T: Config> Pallet<T>  {
 		match Self::get_policy_by_pallet(pid) {
 			Ok(info) => {
 				ensure!(num >= info.policyStart, Error::<T>::LowBlockNumber);
-				let range = info.period;
+				ensure!(info.period > Zero::zero(), Error::<T>::InValidPeriod);
+				let range: u32 = info.period.try_into().map_err(|_| Error::<T>::ConvertFailed)?;
 
 				if let (_,reserve,last) = PolicyReserve::<T>::get(pid) {
 					let mut lastAssign = last;
@@ -321,14 +325,14 @@ impl<T: Config> Pallet<T>  {
 						lastAssign = info.policyStart
 					}
 					ensure!(num >= lastAssign, Error::<T>::LowBlockNumber);
-					let useblock = num - lastAssign;
+					let useblock: u32 = (num - lastAssign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;
 
-					if lastAssign >= info.policyStop || useblock == Zero::zero() {
+					if lastAssign >= info.policyStop || useblock == 0 {
 						/// user was revoke the policy and stop it
 						return Ok(())
 					}
 
-					let mut all = reserve * useblock.into() as u128 / range.into() as u128;
+					let mut all = reserve * <BalanceOf<T>>::from(useblock) / <BalanceOf<T>>::from(range);
 					if all > reserve {
 						all = reserve;
 					}
@@ -345,15 +349,14 @@ impl<T: Config> Pallet<T>  {
 					Err(Error::<T>::NoReserve)?
 				}
 			},
-			Err(e) => e,
+			Err(e) => Err(e),
 		}
 	}
 
 	pub fn reward_in_epoch(num: T::BlockNumber) -> DispatchResult {
-		let all_keys = PolicyReserve::<T>::iter_keys().collect::<Vec<_>>();
-		for i in 0..all_keys.len() {
-			Self::calc_reward_in_policy(num,all_keys[i]);
-		}
+		PolicyReserve::<T>::iter().for_each(|(k,_)|{
+			Self::calc_reward_in_policy(num,k);
+		});
 		Ok(())
 	}
 }
@@ -363,8 +366,8 @@ impl<T: Config> BasePolicy<T::AccountId,BalanceOf<T>,PolicyID> for Pallet<T> {
 	fn create_policy(who: T::AccountId,amount: BalanceOf<T>,pid: PolicyID) -> DispatchResult {
 		ensure!(!PolicyReserve::<T>::contains_key(pid), Error::<T>::RepeatReserve);
 
-		PolicyReserve::<T>::mutate(pid, |&mut old_balance| -> DispatchResult {
-			*old_balance = (who,amount,Zero::zero());
+		PolicyReserve::<T>::mutate(pid, |val| -> DispatchResult {
+			*val = (who,amount,Zero::zero());
 			let valut: T::AccountId = Self::account_id();
 			T::Currency::transfer(&who,&valut,amount,AllowDeath)
 		})
