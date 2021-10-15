@@ -201,7 +201,7 @@ impl<T: Config> Pallet<T>  {
 	}
 	pub fn get_total_staking() -> BalanceOf<T> {
 		Stakers::<T>::iter()
-			.filter(|&(_,val)| val.iswork)
+			.filter(|(_,val)| val.iswork)
 			.map(|(_,val)| val.clone())
 			.fold(Zero::zero(),|acc,v|{
 				acc + v.lockedBalance
@@ -242,7 +242,7 @@ impl<T: Config> Pallet<T>  {
 	pub fn mint_by_staker(all_reward: BalanceOf<T>) -> DispatchResult {
 		let total = Self::get_total_staking();
 		let cur_all_reward: Vec<_> = Stakers::<T>::iter()
-			.filter(|&(_,val)| val.iswork)
+			.filter(|(_,val)| val.iswork)
 			.map(|(_,val)| {
 				let reward = (val.lockedBalance.clone() * all_reward.clone()) / total.clone();
 				(val.coinbase.clone(),reward)
@@ -268,27 +268,24 @@ impl<T: Config> Pallet<T>  {
 		}
 		Ok(())
 	}
-	pub fn base_reward(staker: T::AccountId,amount: BalanceOf<T>) -> DispatchResult {
-		ensure!(amount >= Zero::zero(), Error::<T>::BalanceLow);
+	pub fn base_reward(staker: T::AccountId,balance: BalanceOf<T>) -> DispatchResult {
+		ensure!(balance >= Zero::zero(), Error::<T>::BalanceLow);
+		ensure!(Rewards::<T>::contains_key(staker.clone()),Error::<T>::AccountNotExist);
+		let amount: BalanceOf<T> = balance.clone();
 
-		if !Rewards::<T>::contains_key(staker.clone()) {
-			Err(Error::<T>::AccountNotExist)?
-		}
-
-		Rewards::<T>::mutate(staker.clone(), |&mut old_balance| -> DispatchResult {
-			ensure!(old_balance >= amount, Error::<T>::BalanceLow);
+		Rewards::<T>::mutate(staker.clone(), |val| -> DispatchResult {
+			ensure!(*val >= amount, Error::<T>::BalanceLow);
 			ensure!(Self::vault_balance() >= amount, Error::<T>::VaultBalanceLow);
 
-			old_balance = old_balance.checked_sub(&amount)
-				.ok_or(Error::<T>::BalanceLow)?;
+			*val = val.checked_sub(&amount).ok_or(Error::<T>::BalanceLow)?;
 			let valut: T::AccountId = Self::account_id();
 			T::Currency::transfer(&valut,&staker,amount,AllowDeath)
 		})
 	}
 	pub fn coinbase_to_staker_key(accounts: Vec<T::AccountId>) -> Vec<T::Hash> {
 		let keys: Vec<_> = Stakers::<T>::iter()
-			.filter(|&(_,val)| {
-				accounts.into_iter().find(|x| *x==val.coinbase ).is_some()
+			.filter(|(_,val)| {
+				accounts.clone().into_iter().find(|x| *x==val.coinbase ).is_some()
 			})
 			.map(|(x,_)| x )
 			.collect();
@@ -367,9 +364,10 @@ impl<T: Config> BasePolicy<T::AccountId,BalanceOf<T>,PolicyID> for Pallet<T> {
 		ensure!(!PolicyReserve::<T>::contains_key(pid), Error::<T>::RepeatReserve);
 
 		PolicyReserve::<T>::mutate(pid, |val| -> DispatchResult {
-			*val = (who,amount,Zero::zero());
+			*val = (who.clone(),amount,Zero::zero());
 			let valut: T::AccountId = Self::account_id();
-			T::Currency::transfer(&who,&valut,amount,AllowDeath)
+			let from = who.clone();
+			T::Currency::transfer(&from,&valut,amount,AllowDeath)
 		})
 	}
 }
