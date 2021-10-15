@@ -3965,6 +3965,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "nulink-utils",
+ "pallet-policy",
  "parity-scale-codec",
  "serde",
  "sp-core",
