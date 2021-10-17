@@ -10,7 +10,7 @@ use sp_runtime::{traits::{
 	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
 	Saturating, StaticLookup, Zero, Hash,
 }, DispatchError};
-use frame_support::{ensure,dispatch::DispatchResult, pallet_prelude::*};
+use frame_support::{ensure,dispatch::DispatchResult,inherent::Vec, pallet_prelude::*};
 use codec::MaxEncodedLen;
 use nulink_utils::{BasePolicy,GetPolicyInfo,PolicyID,PolicyInfo};
 

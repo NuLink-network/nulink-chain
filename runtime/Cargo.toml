@@ -46,6 +46,8 @@ sp-version = {default-features = false, version = '3.0.0', git = 'https://github
 
 # local dependencies
 #nulink-utils = {default-features = false,version = '3.0.0', path = '../pallets/utils' }
+pallet-policy = {default-features = false,version = '3.0.0', path = '../pallets/policy' }
+pallet-nuproxy = {default-features = false,version = '3.0.0', path = '../pallets/nuproxy' }
 
 [features]
 default = ['std']

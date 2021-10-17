@@ -18,10 +18,10 @@ use sp_runtime::{traits::{
 	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
 	Saturating, StaticLookup, Zero,Hash,AccountIdConversion,
 }};
-use std::convert::TryInto;
+use sp_std::convert::TryInto;
 pub use types::{StakeInfo};
 use frame_support::{
-	ensure,
+	ensure,inherent::Vec,
 	traits::{Get,ReservableCurrency, ExistenceRequirement::AllowDeath, Currency},
 	dispatch::DispatchResult, pallet_prelude::*, PalletId
 };

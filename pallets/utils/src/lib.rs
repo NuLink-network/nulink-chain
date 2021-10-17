@@ -5,7 +5,7 @@
 /// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
 
 // pub use pallet::*;
-use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
+use frame_support::{dispatch::DispatchResult,inherent::Vec, pallet_prelude::*};
 use frame_system::pallet_prelude::*;
 
 
