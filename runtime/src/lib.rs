@@ -30,7 +30,7 @@ pub use pallet_timestamp::Call as TimestampCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use sp_runtime::{Permill, Perbill};
 pub use frame_support::{
-	construct_runtime, parameter_types, StorageValue,
+	construct_runtime, parameter_types, StorageValue,PalletId,
 	traits::{KeyOwnerProofSystem, Randomness},
 	weights::{
 		Weight, IdentityFee,
@@ -40,8 +40,8 @@ pub use frame_support::{
 use pallet_transaction_payment::CurrencyAdapter;
 
 /// Import the utils pallet.
-// pub use pallet_policy;
-// pub use pallet_nuproxy;
+pub use pallet_policy;
+pub use pallet_nuproxy;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -271,9 +271,25 @@ impl pallet_sudo::Config for Runtime {
 }
 
 /// Configure the pallet-utils in pallets/utils.
-// impl pallet_template::Config for Runtime {
-// 	type Event = Event;
-// }
+impl pallet_policy::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type PolicyHandle = NulinkNuproxy;
+}
+
+parameter_types! {
+	pub const NulinkPalletId: PalletId = PalletId(*b"py/proxy");
+	pub const InitRewardUnit: Balance = 100;
+}
+
+impl pallet_nuproxy::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type Currency = Balances;
+	type GetPolicyInfo = NulinkPolicy;
+	type PalletId = NulinkPalletId;
+	type RewardUnit = InitRewardUnit;
+}
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -291,7 +307,8 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage},
 		Sudo: pallet_sudo::{Pallet, Call, Config<T>, Storage, Event<T>},
 		// Include the custom logic from the pallet-utils in the runtime.
-		// TemplateModule: pallet_template::{Pallet, Call, Storage, Event<T>},
+		NulinkPolicy: pallet_policy::{Pallet, Call, Storage, Event<T>},
+		NulinkNuproxy: pallet_nuproxy::{Pallet, Call, Storage, Event<T>},
 	}
 );
 
