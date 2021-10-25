@@ -88,6 +88,15 @@ pub mod pallet {
 	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
 	#[pallet::call]
 	impl<T:Config> Pallet<T> {
+		/// create policy by user and set the key params to nulink network.
+		///
+		/// Origin must be Signed.
+		/// `pid`: the ID of the policy,produced by the user on outside.
+		/// `amount`: the amount of the local asset(NlK),used to reward for the
+		/// stakers.
+		/// `period`: Indicates the time range for the staker to process the policy,
+		/// calculated by the number of blocknumbers.
+		/// `stakers`: the worker of the nulink network,it works for the crypto newwork.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn create_policy(origin: OriginFor<T>,pid: PolicyID,amount: T::Balance,
 		period: T::BlockNumber,stakers: Vec<T::AccountId>) -> DispatchResult {
