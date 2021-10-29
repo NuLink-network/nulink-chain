@@ -156,6 +156,8 @@ impl<T: Config> Pallet<T>  {
 }
 
 impl<T: Config> GetPolicyInfo<T::AccountId,PolicyID,T::BlockNumber> for Pallet<T> {
+	/// get the policy info by policy id,it called from nuproxy pallet to calc the reward
+	/// in the epoch.
 	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
 		Self::get_policy_info_by_pid(pid)
 	}
