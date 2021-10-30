@@ -319,7 +319,7 @@ impl<T: Config> Pallet<T>  {
 				if let (_,reserve,last) = PolicyReserve::<T>::get(pid) {
 					let mut lastAssign = last;
 					if lastAssign == Zero::zero() {
-						lastAssign = info.policyStart
+						lastAssign = info.policyStart;
 					}
 					ensure!(num >= lastAssign, Error::<T>::LowBlockNumber);
 					let useblock: u32 = (num - lastAssign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;

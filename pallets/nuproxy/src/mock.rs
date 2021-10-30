@@ -1,9 +1,11 @@
+use super::*;
 use crate as pallet_nuproxy;
 use sp_core::H256;
 use frame_support::parameter_types;
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup}, testing::Header,
 };
+pub use pallet_balances;
 use frame_system as system;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -17,7 +19,9 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-		TemplateModule: pallet_nuproxy::{Pallet, Call, Storage, Event<T>},
+		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
+		NulinkPolicy: pallet_policy::{Pallet, Call, Storage, Event<T>},
+		NuLinkProxy: pallet_nuproxy::{Pallet, Call, Storage, Event<T>},
 	}
 );
 
@@ -44,7 +48,7 @@ impl system::Config for Test {
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
-	type AccountData = ();
+	type AccountData = pallet_balances::AccountData<u64>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
@@ -52,9 +56,40 @@ impl system::Config for Test {
 	type OnSetCode = ();
 }
 
-impl pallet_nuproxy::Config for Test {
-	type Event = Event;
+parameter_types! {
+	pub const ExistentialDeposit: u64 = 500;
+	pub const MaxLocks: u32 = 50;
 }
+
+impl pallet_balances::Config for Test {
+	type MaxLocks = MaxLocks;
+	type Balance = u64;
+	type Event = Event;
+	type DustRemoval = ();
+	type ExistentialDeposit = ExistentialDeposit;
+	type AccountStore = System;
+	type WeightInfo = ();
+}
+
+impl pallet_policy::Config for Test {
+	type Event = Event;
+	type Balance = u64;
+	type PolicyHandle = NuLinkProxy;
+}
+parameter_types! {
+	pub const NulinkPalletId: PalletId = PalletId(*b"py/proxy");
+	pub const InitRewardUnit: u64 = 100;
+}
+
+impl Config for Test {
+	type Event = Event;
+	type Balance = u64;
+	type Currency = Balances;
+	type GetPolicyInfo = NulinkPolicy;
+	type PalletId = NulinkPalletId;
+	type RewardUnit = InitRewardUnit;
+}
+
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
