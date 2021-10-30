@@ -147,7 +147,12 @@ pub mod pallet {
 			<Watchers<T>>::insert(who.clone(),1);
 			Ok(())
 		}
-		/// update the staker infos and calc reward by epoch with the called by watchers
+		/// update the staker infos and calc reward by epoch with the called by watchers.
+		/// update the staker infos from ethereum network and reward it in every epoch if
+		/// it still works in the ethereum. If it stops working, the watcher will periodically
+		/// notify the nulink network and stop rewarding it.
+		///
+		/// `infos`: the new stakers in next epoch from ethereum by watcher set.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn update_staker_infos_and_mint(origin: OriginFor<T>,infos: Vec<StakeInfo<T::AccountId,BalanceOf<T>>>) -> DispatchResult {
 			let watcher = ensure_signed(origin)?;

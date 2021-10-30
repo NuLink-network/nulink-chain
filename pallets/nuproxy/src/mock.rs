@@ -11,6 +11,11 @@ use frame_system as system;
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
+pub const A: u128 = 100;
+pub const B: u128 = 200;
+pub const OWNER: u128 = 88;
+pub const RECEIVER: u128 = 7;
+
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
 	pub enum Test where
@@ -94,4 +99,13 @@ impl Config for Test {
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+}
+pub fn make_stake_infos(id: u64,lock_balance: u64,count: u32) -> StakeInfo<<Test as frame_system::Config>::AccountId,u64> {
+	StakeInfo{
+		coinbase: id.clone(),
+		workbase: [0;32],
+		iswork: true,
+		lockedBalance: lock_balance,
+		workcount: count,
+	}
 }
