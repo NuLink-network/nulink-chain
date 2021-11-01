@@ -194,6 +194,9 @@ impl<T: Config> Pallet<T>  {
 		let vault = Self::account_id();
 		T::Currency::free_balance(&vault)
 	}
+	pub fn get_staker_count() -> u64 {
+		return Stakers::<T>::iter().count() as u64;
+	}
 	pub fn calc_staker_hash(staker: StakeInfo<T::AccountId,BalanceOf<T>>) -> T::Hash {
 		let mut s = staker.clone();
 		s.iswork = false;
@@ -222,6 +225,9 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		for k in unused { Watchers::<T>::remove(&k); }
 	}
+	/// first,make all old staker is stopping `iswork=false`,if the staker which in `old` still in next
+	/// epoch will be added again.
+	/// add the new stakers in to the nulink.
 	pub fn update_stakers(new_stakers: Vec<StakeInfo<T::AccountId,BalanceOf<T>>>) -> DispatchResult {
 
 		let keys = Stakers::<T>::iter()
@@ -244,6 +250,7 @@ impl<T: Config> Pallet<T>  {
 		}
 		Ok(())
 	}
+
 	pub fn mint_by_staker(all_reward: BalanceOf<T>) -> DispatchResult {
 		let total = Self::get_total_staking();
 		let cur_all_reward: Vec<_> = Stakers::<T>::iter()
