@@ -110,7 +110,19 @@ fn it_works_for_mint_in_epoch() {
 		let staker3 = make_stake_infos(3,300,3);
 		let stakers1 = vec![staker1.clone(),staker2.clone(),staker3.clone()];
 		assert_ok!(NuLinkProxy::update_stakers(stakers1));
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(staker1.coinbase.clone()),0);
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase.clone()),0);
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase.clone()),0);
 		assert_ok!(NuLinkProxy::mint_by_staker(100));
+		let allStaking = NuLinkProxy::get_total_staking();
+		let v3 =  staker3.lockedBalance * 100 / allStaking;
+		let v2 = staker2.lockedBalance * 100 / allStaking;
+		let v1 = 100 - v2 -v3;
+		assert_eq!(v1,NuLinkProxy::get_staker_reward_by_coinbase(staker1.coinbase));
+		assert_eq!(v2,NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase));
+		assert_eq!(v3,NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase));
+		// mint again
+		
 	});
 }
 

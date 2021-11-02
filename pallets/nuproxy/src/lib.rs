@@ -225,6 +225,9 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		for k in unused { Watchers::<T>::remove(&k); }
 	}
+	pub fn get_staker_reward_by_coinbase(account: T::AccountId) -> BalanceOf<T> {
+		Rewards::<T>::get(account)
+	}
 	/// first,make all old staker is stopping `iswork=false`,if the staker which in `old` still in next
 	/// epoch will be added again.
 	/// add the new stakers in to the nulink.
