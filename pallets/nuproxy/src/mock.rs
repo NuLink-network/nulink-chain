@@ -2,6 +2,7 @@ use super::*;
 use crate as pallet_nuproxy;
 use sp_core::H256;
 use frame_support::parameter_types;
+use frame_support::{assert_ok, assert_noop};
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup}, testing::Header,
 };
@@ -108,4 +109,9 @@ pub fn make_stake_infos(id: u64,lock_balance: u64,count: u32) -> StakeInfo<<Test
 		lockedBalance: lock_balance,
 		workcount: count,
 	}
+}
+
+pub fn set_the_policy(id: u64,value: u64,pid: u128) -> u128 {
+	assert_ok!(NuLinkProxy::create_policy(id,value,pid.clone()));
+	pid.clone()
 }

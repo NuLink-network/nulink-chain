@@ -41,6 +41,25 @@ fn it_works_for_set_watcher() {
 }
 
 #[test]
+fn it_works_for_coinbase_to_keys() {
+	new_test_ext().execute_with(|| {
+		// keep the stakers
+		let staker1 = make_stake_infos(1,100,1);
+		let staker2 = make_stake_infos(2,200,2);
+		let staker3 = make_stake_infos(3,300,3);
+		let stakers1 = vec![staker1.clone(),staker2.clone(),staker3.clone()];
+		assert_ok!(NuLinkProxy::update_stakers(stakers1));
+		let accounts = vec![1 as u64,2,3];
+		let h = NuLinkProxy::coinbase_to_staker_key(accounts);
+		assert_eq!(h.len(),3);
+		println!("{:?}", h);
+		assert_eq!(h[2],NuLinkProxy::calc_staker_hash(staker1.clone()));
+		assert_eq!(h[1],NuLinkProxy::calc_staker_hash(staker2.clone()));
+		assert_eq!(h[0],NuLinkProxy::calc_staker_hash(staker3.clone()));
+	});
+}
+
+#[test]
 fn it_works_for_calc_staker_hash() {
 	new_test_ext().execute_with(|| {
 		let staker0 = make_stake_infos(1,100,1);
@@ -84,14 +103,32 @@ fn it_works_for_update_staker() {
 }
 
 #[test]
-fn it_works_for_reward_in_epoch() {
+fn it_works_for_mint_in_epoch() {
 	new_test_ext().execute_with(|| {
-
+		let staker1 = make_stake_infos(1,100,1);
+		let staker2 = make_stake_infos(2,200,2);
+		let staker3 = make_stake_infos(3,300,3);
+		let stakers1 = vec![staker1.clone(),staker2.clone(),staker3.clone()];
+		assert_ok!(NuLinkProxy::update_stakers(stakers1));
+		assert_ok!(NuLinkProxy::mint_by_staker(100));
 	});
 }
 
 #[test]
-fn it_works_for_mint_in_epoch() {
+fn it_works_for_reward_by_user_policy() {
+	new_test_ext().execute_with(|| {
+		let staker1 = make_stake_infos(1,100,1);
+		let staker2 = make_stake_infos(2,200,2);
+		let staker3 = make_stake_infos(3,300,3);
+		let stakers1 = vec![staker1.clone(),staker2.clone(),staker3.clone()];
+		assert_ok!(NuLinkProxy::update_stakers(stakers1));
+		let num = frame_system::Pallet::<Test>::block_number();
+		assert_ok!(NuLinkProxy::reward_in_epoch(num));
+	});
+}
+
+#[test]
+fn it_works_for_set_get_from_vault() {
 	new_test_ext().execute_with(|| {
 
 	});

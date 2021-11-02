@@ -250,7 +250,9 @@ impl<T: Config> Pallet<T>  {
 		}
 		Ok(())
 	}
-
+	/// In each epoch, the nulink start to allocate a fixed reward to all stakers, and all stakers will
+	/// distribute the reward proportionally according to their stake.
+	/// the staker can claim their reward in any time.
 	pub fn mint_by_staker(all_reward: BalanceOf<T>) -> DispatchResult {
 		let total = Self::get_total_staking();
 		let cur_all_reward: Vec<_> = Stakers::<T>::iter()
@@ -361,7 +363,11 @@ impl<T: Config> Pallet<T>  {
 			Err(e) => Err(e),
 		}
 	}
-
+	/// Calculate the reward for each user’s policy in every epoch. The reward is used to distribute
+	/// to each staker who has processed the policy. After the user has created the policy,
+	/// he can terminate the policy at any time and redeem his remaining pledge.
+	///
+	/// `num`: the reward assignment by the block numbers.
 	pub fn reward_in_epoch(num: T::BlockNumber) -> DispatchResult {
 		PolicyReserve::<T>::iter().for_each(|(k,_)|{
 			Self::calc_reward_in_policy(num,k);
