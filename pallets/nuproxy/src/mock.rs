@@ -12,10 +12,6 @@ use frame_system as system;
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
-pub const A: u128 = 100;
-pub const B: u128 = 200;
-pub const OWNER: u128 = 88;
-pub const RECEIVER: u128 = 7;
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
@@ -63,7 +59,7 @@ impl system::Config for Test {
 }
 
 parameter_types! {
-	pub const ExistentialDeposit: u64 = 500;
+	pub const ExistentialDeposit: u64 = 1;
 	pub const MaxLocks: u32 = 50;
 }
 
@@ -96,10 +92,17 @@ impl Config for Test {
 	type RewardUnit = InitRewardUnit;
 }
 
+pub const A: u64 = 77;
+pub const B: u64 = 78;
+pub const OWNER: u64 = 79;
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+	// system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	let genesis = pallet_balances::GenesisConfig::<Test> { balances: vec![(A, 100), (B, 1000),(OWNER,1000)] };
+	genesis.assimilate_storage(&mut t).unwrap();
+	t.into()
 }
 pub fn make_stake_infos(id: u64,lock_balance: u64,count: u32) -> StakeInfo<<Test as frame_system::Config>::AccountId,u64> {
 	StakeInfo{
@@ -110,7 +113,10 @@ pub fn make_stake_infos(id: u64,lock_balance: u64,count: u32) -> StakeInfo<<Test
 		workcount: count,
 	}
 }
-
+pub fn create_policy(id: u64,amount: u64,period: u64,policyid: u128,stakers: Vec<u64>) -> u128 {
+	assert_ok!(NulinkPolicy::base_create_policy(id,policyid,amount,period,stakers));
+	policyid
+}
 pub fn set_the_policy(id: u64,value: u64,pid: u128) -> u128 {
 	assert_ok!(NuLinkProxy::create_policy(id,value,pid.clone()));
 	pid.clone()

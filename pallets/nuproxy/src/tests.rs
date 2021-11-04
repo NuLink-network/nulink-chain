@@ -152,6 +152,9 @@ fn it_works_for_reward_by_user_policy() {
 		let staker3 = make_stake_infos(3,300,3);
 		let stakers1 = vec![staker1.clone(),staker2.clone(),staker3.clone()];
 		assert_ok!(NuLinkProxy::update_stakers(stakers1));
+		frame_system::Pallet::<Test>::set_block_number(10);
+		// set policy to the nulink
+		let policy_id = set_the_policy(OWNER.clone(),500,1111);
 		let num = frame_system::Pallet::<Test>::block_number();
 		assert_ok!(NuLinkProxy::reward_in_epoch(num));
 	});
