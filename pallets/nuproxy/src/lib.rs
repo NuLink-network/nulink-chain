@@ -311,6 +311,7 @@ impl<T: Config> Pallet<T>  {
 	pub fn get_policy_by_pallet(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
 		T::GetPolicyInfo::get_policy_info_by_pid(pid)
 	}
+	/// All staker members share the policy rewards
 	pub fn assigned_by_policy_reward(keys: Vec<T::AccountId>,allAmount: BalanceOf<T>) -> DispatchResult {
 		let count = keys.len();
 		let amount = allAmount / <BalanceOf<T>>::from(count  as u32);

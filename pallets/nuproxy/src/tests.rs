@@ -122,7 +122,25 @@ fn it_works_for_mint_in_epoch() {
 		assert_eq!(v2,NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase));
 		assert_eq!(v3,NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase));
 		// mint again
-		
+		assert_ok!(NuLinkProxy::mint_by_staker(200));
+		let vv3 = staker3.lockedBalance * 200 / allStaking;
+		let vv2 = staker2.lockedBalance * 200 / allStaking;
+		let vv1 = 200 - vv2 - vv3;
+		assert_eq!(v1+vv1,NuLinkProxy::get_staker_reward_by_coinbase(staker1.coinbase));
+		assert_eq!(v2+vv2,NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase));
+		assert_eq!(v3+vv3,NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase));
+	});
+}
+#[test]
+fn it_works_for_assigned_by_policy_reward() {
+	new_test_ext().execute_with(|| {
+		let allAmount :u64 = 100;
+		let ids = vec![1 as u64,2,3];
+		assert_ok!(NuLinkProxy::assigned_by_policy_reward(ids.clone(),allAmount));
+		let unit = allAmount / ids.len() as u64;
+		assert_eq!(unit,NuLinkProxy::get_staker_reward_by_coinbase(1));
+		assert_eq!(unit,NuLinkProxy::get_staker_reward_by_coinbase(2));
+		assert_eq!(unit,NuLinkProxy::get_staker_reward_by_coinbase(3));
 	});
 }
 
