@@ -153,10 +153,22 @@ fn it_works_for_reward_by_user_policy() {
 		let stakers1 = vec![staker1.clone(),staker2.clone(),staker3.clone()];
 		assert_ok!(NuLinkProxy::update_stakers(stakers1));
 		frame_system::Pallet::<Test>::set_block_number(10);
-		// set policy to the nulink
-		let policy_id = set_the_policy(OWNER.clone(),500,1111);
+		// create the policy by owner
+		let value = 100;
+		let policyid = 1111;
+		let stakers0 = vec![1,2];
+		// check the owner asset
+		assert_eq!(Balances::free_balance(OWNER),1000);
+		create_policy(OWNER.clone(),value,50,policyid,stakers0.clone());
+		assert_eq!(PolicyReserve::<Test>::contains_key(policyid),true);
+		assert_eq!(Balances::free_balance(OWNER),1000-value);
+		// set the epoch
+		let epoch = 20;
+		frame_system::Pallet::<Test>::set_block_number(epoch);
 		let num = frame_system::Pallet::<Test>::block_number();
 		assert_ok!(NuLinkProxy::reward_in_epoch(num));
+		// check the result
+
 	});
 }
 
