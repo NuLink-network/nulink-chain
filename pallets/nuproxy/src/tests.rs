@@ -166,9 +166,24 @@ fn it_works_for_reward_by_user_policy() {
 		let epoch = 20;
 		frame_system::Pallet::<Test>::set_block_number(epoch);
 		let num = frame_system::Pallet::<Test>::block_number();
-		assert_ok!(NuLinkProxy::reward_in_epoch(num));
-		// check the result
+		// check the staker balance
+		assert_eq!(Balances::free_balance(1),0);
+		assert_eq!(Balances::free_balance(2),0);
+		assert_eq!(Balances::free_balance(3),0);
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(1),0);
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(2),0);
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(3),0);
 
+		assert_ok!(NuLinkProxy::reward_in_epoch(num));
+		// check the vault
+		assert_eq!(NuLinkProxy::vault_balance(),value);
+		let alluse = value * (num-11) / 50;
+		let unit = alluse / 2;
+		// check the reward of the staker
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(1),unit);
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(2),unit);
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(3),0);
+		// now the staker can claim their reward
 	});
 }
 

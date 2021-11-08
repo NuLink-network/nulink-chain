@@ -378,10 +378,6 @@ impl<T: Config> Pallet<T>  {
 		});
 		Ok(())
 	}
-	pub fn vault_of() -> BalanceOf<T> {
-		let valut: T::AccountId = Self::account_id();
-		T::Currency::free_balance(&valut)
-	}
 }
 
 impl<T: Config> BasePolicy<T::AccountId,BalanceOf<T>,PolicyID> for Pallet<T> {
