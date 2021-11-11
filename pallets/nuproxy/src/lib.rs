@@ -131,7 +131,9 @@ pub mod pallet {
 		RepeatReserve,
 		/// watcher not exist
 		NoWatcher,
+		/// the period of the policy was invalid
 		InValidPeriod,
+		/// convert failed from blocknumber to i32
 		ConvertFailed,
 	}
 
@@ -343,14 +345,20 @@ impl<T: Config> Pallet<T>  {
 					if lastAssign == Zero::zero() {
 						lastAssign = info.policyStart;
 					}
-					ensure!(num >= lastAssign, Error::<T>::LowBlockNumber);
-					let useblock: u32 = (num - lastAssign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;
+					if lastAssign >= info.policyStop {
+						return Ok(())
+					}
+					let mut stop = num;
+					if num > info.policyStop {
+						stop = info.policyStop;
+					}
+					ensure!(stop >= lastAssign, Error::<T>::LowBlockNumber);
+					let useblock: u32 = (stop - lastAssign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;
 
-					if lastAssign >= info.policyStop || useblock == 0 {
+					if useblock == 0 {
 						/// user was revoke the policy and stop it
 						return Ok(())
 					}
-
 					let mut all = reserve * <BalanceOf<T>>::from(useblock) / <BalanceOf<T>>::from(range);
 					if all > reserve {
 						all = reserve;
