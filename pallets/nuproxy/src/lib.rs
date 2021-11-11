@@ -82,6 +82,10 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn policy_reserve)]
 	/// reserve asset for policy assigned to the stakers
+	/// key: policy id
+	/// Accountid: the owner of the policy's creator
+	/// Balance: the asset of the policy which use to assigned to stakers
+	/// BlockNumber: the block number when the reward was last distributed
 	pub(super) type PolicyReserve<T: Config> =  StorageMap<_, Blake2_128Concat, u128,
 		(T::AccountId,BalanceOf<T>,T::BlockNumber), ValueQuery>;
 
