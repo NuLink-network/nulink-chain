@@ -345,12 +345,24 @@ impl<T: Config> Pallet<T>  {
 				ensure!(info.period > Zero::zero(), Error::<T>::InValidPeriod);
 				let range: u32 = info.period.try_into().map_err(|_| Error::<T>::ConvertFailed)?;
 
-				if let (_,reserve,last) = PolicyReserve::<T>::get(pid) {
+				if let (user,reserve,last) = PolicyReserve::<T>::get(pid) {
 					let mut lastAssign = last;
 					if lastAssign == Zero::zero() {
 						lastAssign = info.policyStart;
 					}
-					if lastAssign >= info.policyStop {
+					if lastAssign >= info.policyStop || reserve == Zero::zero() {
+						// the user stop the policy or Deplete all assets
+						if reserve > Zero::zero() {
+							Rewards::<T>::mutate(user.clone(), |val| -> DispatchResult {
+								let new_amount = val.saturating_add(reserve);
+								*val = new_amount;
+								Ok(())
+							});
+							PolicyReserve::<T>::mutate(pid,|x|->DispatchResult {
+								x.1 = Zero::zero();
+								Ok(())
+							});
+						}
 						return Ok(())
 					}
 					let mut stop = num;
