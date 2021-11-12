@@ -91,7 +91,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn rewards)]
-	/// reserved rewards of the stakers,staker need claim it.
+	/// reserved rewards of the stakers or policy creator,staker or the creator need claim it.
 	pub(super) type Rewards<T: Config> =  StorageMap<_, Blake2_128Concat, T::AccountId, BalanceOf<T>, ValueQuery>;
 
 
@@ -172,6 +172,11 @@ pub mod pallet {
 		pub fn claim_reward_by_staker(origin: OriginFor<T>,amount: BalanceOf<T>) -> DispatchResult {
 			let staker = ensure_signed(origin)?;
 			Self::base_reward(staker,amount)
+		}
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn claim_reward_by_user(origin: OriginFor<T>,amount: BalanceOf<T>) -> DispatchResult {
+			let account = ensure_signed(origin)?;
+			Self::base_reward(account,amount)
 		}
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn reserve_to_vault(origin: OriginFor<T>,amount: BalanceOf<T>) -> DispatchResult {
@@ -291,18 +296,18 @@ impl<T: Config> Pallet<T>  {
 		}
 		Ok(())
 	}
-	pub fn base_reward(staker: T::AccountId,balance: BalanceOf<T>) -> DispatchResult {
+	pub fn base_reward(account: T::AccountId,balance: BalanceOf<T>) -> DispatchResult {
 		ensure!(balance >= Zero::zero(), Error::<T>::BalanceLow);
-		ensure!(Rewards::<T>::contains_key(staker.clone()),Error::<T>::AccountNotExist);
+		ensure!(Rewards::<T>::contains_key(account.clone()),Error::<T>::AccountNotExist);
 		let amount: BalanceOf<T> = balance.clone();
 
-		Rewards::<T>::mutate(staker.clone(), |val| -> DispatchResult {
+		Rewards::<T>::mutate(account.clone(), |val| -> DispatchResult {
 			ensure!(*val >= amount, Error::<T>::BalanceLow);
 			ensure!(Self::vault_balance() >= amount, Error::<T>::VaultBalanceLow);
 
 			*val = val.checked_sub(&amount).ok_or(Error::<T>::BalanceLow)?;
 			let valut: T::AccountId = Self::account_id();
-			T::Currency::transfer(&valut,&staker,amount,AllowDeath)
+			T::Currency::transfer(&valut,&account,amount,AllowDeath)
 		})
 	}
 	pub fn coinbase_to_staker_key(accounts: Vec<T::AccountId>) -> Vec<T::Hash> {
@@ -390,6 +395,7 @@ impl<T: Config> Pallet<T>  {
 		});
 		Ok(())
 	}
+
 }
 
 impl<T: Config> BasePolicy<T::AccountId,BalanceOf<T>,PolicyID> for Pallet<T> {
