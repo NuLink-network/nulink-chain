@@ -1,6 +1,7 @@
 use super::*;
 use crate::{Error, mock::*};
 use frame_support::{assert_ok, assert_noop};
+use frame_system::RawOrigin;
 
 #[test]
 fn it_works_for_default_value() {
@@ -190,7 +191,18 @@ fn it_works_for_reward_by_user_policy() {
 #[test]
 fn it_works_for_set_get_from_vault() {
 	new_test_ext().execute_with(|| {
-
+		// transfer balance to vault
+		let valut = NuLinkProxy::account_id();
+		assert_ok!(Balances::transfer(RawOrigin::Signed(A).into(),valut,10));
+		assert_eq!(Balances::free_balance(A),90);
+		assert_eq!(Balances::free_balance(&valut),10);
+		assert_ok!(Balances::transfer(RawOrigin::Signed(B).into(),valut,200));
+		assert_eq!(Balances::free_balance(B),800);
+		assert_eq!(Balances::free_balance(&valut),210);
+		// use from the vault
+		assert_ok!(Balances::transfer(RawOrigin::Signed(valut).into(),1,20));
+		assert_eq!(Balances::free_balance(1),20);
+		assert_eq!(Balances::free_balance(&valut),190);
 	});
 }
 #[test]
