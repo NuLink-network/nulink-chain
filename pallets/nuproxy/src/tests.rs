@@ -208,9 +208,6 @@ fn it_works_for_set_get_from_vault() {
 #[test]
 fn it_works_for_claim_reward() {
 	new_test_ext().execute_with(|| {
-		let valut = NuLinkProxy::account_id();
-		assert_ok!(Balances::transfer(RawOrigin::Signed(B).into(),valut,200));
-
 		let staker1 = make_stake_infos(1,100,1);
 		let staker2 = make_stake_infos(2,200,2);
 		let staker3 = make_stake_infos(3,300,3);
@@ -227,7 +224,17 @@ fn it_works_for_claim_reward() {
 		assert_eq!(v1,NuLinkProxy::get_staker_reward_by_coinbase(staker1.coinbase));
 		assert_eq!(v2,NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase));
 		assert_eq!(v3,NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase));
+		let valut = NuLinkProxy::account_id();
+
 		// now the staker can claim the reward
+		// there are not enough assets to withdraw
+		assert_ok!(Balances::transfer(RawOrigin::Signed(B).into(),valut,0));
+		assert_noop!(NuLinkProxy::claim_reward_by_user(RawOrigin::Signed(staker1.coinbase).into(),v1),Error::<Test>::VaultBalanceLow);
+		assert_noop!(NuLinkProxy::claim_reward_by_user(RawOrigin::Signed(staker2.coinbase).into(),v2),Error::<Test>::VaultBalanceLow);
+		assert_noop!(NuLinkProxy::claim_reward_by_user(RawOrigin::Signed(staker3.coinbase).into(),v3),Error::<Test>::VaultBalanceLow);
+
+		// there are enough assets to withdraw
+		assert_ok!(Balances::transfer(RawOrigin::Signed(B).into(),valut,200));
 		assert_ok!(NuLinkProxy::claim_reward_by_user(RawOrigin::Signed(staker1.coinbase).into(),v1));
 		assert_ok!(NuLinkProxy::claim_reward_by_user(RawOrigin::Signed(staker2.coinbase).into(),v2));
 		assert_ok!(NuLinkProxy::claim_reward_by_user(RawOrigin::Signed(staker3.coinbase).into(),v3));
