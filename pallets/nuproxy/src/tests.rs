@@ -208,6 +208,32 @@ fn it_works_for_set_get_from_vault() {
 #[test]
 fn it_works_for_claim_reward() {
 	new_test_ext().execute_with(|| {
+		let valut = NuLinkProxy::account_id();
+		assert_ok!(Balances::transfer(RawOrigin::Signed(B).into(),valut,200));
 
+		let staker1 = make_stake_infos(1,100,1);
+		let staker2 = make_stake_infos(2,200,2);
+		let staker3 = make_stake_infos(3,300,3);
+		let stakers1 = vec![staker1.clone(),staker2.clone(),staker3.clone()];
+		assert_ok!(NuLinkProxy::update_stakers(stakers1));
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(staker1.coinbase.clone()),0);
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase.clone()),0);
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase.clone()),0);
+		assert_ok!(NuLinkProxy::mint_by_staker(100));
+		let allStaking = NuLinkProxy::get_total_staking();
+		let v3 =  staker3.lockedBalance * 100 / allStaking;
+		let v2 = staker2.lockedBalance * 100 / allStaking;
+		let v1 = 100 - v2 -v3;
+		assert_eq!(v1,NuLinkProxy::get_staker_reward_by_coinbase(staker1.coinbase));
+		assert_eq!(v2,NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase));
+		assert_eq!(v3,NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase));
+		// now the staker can claim the reward
+		assert_ok!(NuLinkProxy::claim_reward_by_user(RawOrigin::Signed(staker1.coinbase).into(),v1));
+		assert_ok!(NuLinkProxy::claim_reward_by_user(RawOrigin::Signed(staker2.coinbase).into(),v2));
+		assert_ok!(NuLinkProxy::claim_reward_by_user(RawOrigin::Signed(staker3.coinbase).into(),v3));
+
+		assert_eq!(v1,Balances::free_balance(staker1.coinbase));
+		assert_eq!(v2,Balances::free_balance(staker2.coinbase));
+		assert_eq!(v3,Balances::free_balance(staker3.coinbase));
 	});
 }
