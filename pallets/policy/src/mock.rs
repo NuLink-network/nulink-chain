@@ -1,9 +1,12 @@
+use super::*;
 use crate as pallet_policy;
 use sp_core::H256;
 use frame_support::parameter_types;
+use frame_support::{assert_ok, assert_noop};
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup}, testing::Header,
 };
+pub use pallet_balances;
 use frame_system as system;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -17,7 +20,8 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-		TemplateModule: pallet_policy::{Pallet, Call, Storage, Event<T>},
+		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
+		NulinkPolicy: pallet_policy::{Pallet, Call, Storage, Event<T>},
 	}
 );
 
@@ -44,7 +48,7 @@ impl system::Config for Test {
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
-	type AccountData = ();
+	type AccountData = pallet_balances::AccountData<u64>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
@@ -52,11 +56,42 @@ impl system::Config for Test {
 	type OnSetCode = ();
 }
 
-impl pallet_policy::Config for Test {
-	type Event = Event;
+parameter_types! {
+	pub const ExistentialDeposit: u64 = 1;
+	pub const MaxLocks: u32 = 50;
 }
+
+impl pallet_balances::Config for Test {
+	type MaxLocks = MaxLocks;
+	type Balance = u64;
+	type Event = Event;
+	type DustRemoval = ();
+	type ExistentialDeposit = ExistentialDeposit;
+	type AccountStore = System;
+	type WeightInfo = ();
+}
+
+impl Config for Test {
+	type Event = Event;
+	type Balance = u64;
+	type PolicyHandle = ();
+}
+
+pub const A: u64 = 77;
+pub const B: u64 = 78;
+pub const OWNER: u64 = 79;
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+	// system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	let genesis = pallet_balances::GenesisConfig::<Test> { balances: vec![(A, 100), (B, 1000),(OWNER,1000)] };
+	genesis.assimilate_storage(&mut t).unwrap();
+	t.into()
 }
+
+// impl BasePolicy<u64,u64,PolicyID> for () {
+// 	fn create_policy(who: u64,amount: u64,pid: PolicyID) -> DispatchResult {
+// 		Ok(())
+// 	}
+// }
