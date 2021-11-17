@@ -20,6 +20,7 @@ frame-benchmarking = {default-features = false, optional = true, version = '3.1.
 frame-support = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 frame-system = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 sp-runtime = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
+pallet-balances = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 
 # local dependencies
 nulink-utils = {default-features = false,version = '3.0.0', path = '../utils' }
@@ -37,6 +38,7 @@ std = [
 	'codec/std',
 	'frame-support/std',
 	'frame-system/std',
+	'pallet-balances/std',
 	'frame-benchmarking/std',
 ]
 try-runtime = ['frame-support/try-runtime']
