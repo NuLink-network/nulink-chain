@@ -30,3 +30,7 @@ pub trait BasePolicy<AccountId,Balance,PolicyID> {
 	/// the user create policy and reserve a asset into the vault.
 	fn create_policy(who: AccountId,amount: Balance,pid: PolicyID) -> DispatchResult;
 }
+
+impl<AccountId, Balance, PolicyID> BasePolicy<AccountId, Balance, PolicyID> for () {
+	fn create_policy(who: AccountId,amount: Balance,pid: PolicyID) -> DispatchResult {Ok(())}
+}
