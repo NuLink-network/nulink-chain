@@ -78,6 +78,8 @@ pub mod pallet {
 		NotFoundPolicyID,
 		/// the policy over period
 		PolicyOverPeriod,
+		/// the policy not belong to the account
+		NotPolicyOwner,
 	}
 
 	#[pallet::hooks]
@@ -144,6 +146,7 @@ impl<T: Config> Pallet<T>  {
 			let cur = frame_system::Pallet::<T>::block_number();
 			ensure!(cur > policy.policyStart, Error::<T>::PolicyOverPeriod);
 			ensure!(policy.policyStop >= cur, Error::<T>::PolicyOverPeriod);
+			ensure!(policy.policyOwner == owner, Error::<T>::NotPolicyOwner);
 			policy.policyStop = cur;
 			Ok(())
 		})
