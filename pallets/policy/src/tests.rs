@@ -73,6 +73,9 @@ fn it_works_for_revoke_policy() {
 		// the revoke block number must large the policy.policyStart
 		assert_noop!(NulinkPolicy::base_revoke_policy(pid,1),Error::<Test>::PolicyOverPeriod);
 		frame_system::Pallet::<Test>::set_block_number(10);
+		// not the owner of the policy
+		assert_noop!(NulinkPolicy::base_revoke_policy(pid,2),Error::<Test>::NotPolicyOwner);
+
 		assert_ok!(NulinkPolicy::base_revoke_policy(pid,1));
 
 		let p_info1 = NulinkPolicy::get_policy_info_by_pid(100).unwrap();
