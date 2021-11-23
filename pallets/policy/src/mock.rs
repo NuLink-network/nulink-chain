@@ -89,9 +89,3 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	genesis.assimilate_storage(&mut t).unwrap();
 	t.into()
 }
-
-// impl BasePolicy<u64,u64,PolicyID> for () {
-// 	fn create_policy(who: u64,amount: u64,pid: PolicyID) -> DispatchResult {
-// 		Ok(())
-// 	}
-// }
