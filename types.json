@@ -1,0 +1,23 @@
+{
+    "Address": "AccountId",
+    "LookupSource": "AccountId",
+    "BalanceOf": "Balance",
+    "AssetId": "u32",
+    "BlockNumber": "u32",
+    "PolicyID": "u128",
+  
+    "PolicyInfo": {
+        "pID": "PolicyID",
+        "policyStart": "BlockNumber",
+        "period": "BlockNumber",
+        "policyStop": "BlockNumber",
+        "stackers": "Vec<AccountId>"
+    },
+    "StakeInfo": {
+        "coinbase": "AccountId",
+        "workbase": "[u8;32]",
+        "iswork": "bool",
+        "lockedBalance": "Balance",
+        "workcount": "u32"
+    }
+  }
