@@ -1,30 +1,34 @@
-# Substrate Node Template
+# Nulink
 
 [![Try on playground](https://img.shields.io/badge/Playground-nulink_core-brightgreen?logo=Parity%20Substrate)](https://playground.substrate.dev/?deploy=nulink-core)
 
-A fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacking :rocket:
+The project NuLink is trying to bridge the NuCypher Network to Polkadot Ecosystem. The NuCypher Network is a decentralized network of nodes that perform threshold cryptography operations serving users with secrets management and dynamic access control.
+
+NuLink network used a fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacking :rocket:
 
 ## Getting Started
 
-Follow the steps below to get started with the Node Template, or get it up and running right from your browser
-in just a few clicks using [Playground](https://playground.substrate.dev/) :hammer_and_wrench:
-
-### Using Nix
-
-Install [nix](https://nixos.org/) and optionally [direnv](https://github.com/direnv/direnv) and [lorri](https://github.com/target/lorri) for a fully plug
-and play experience for setting up the development environment. To get all the correct dependencies activate direnv `direnv allow` and lorri `lorri shell`.
-
 ### Rust Setup
 
-First, complete the [basic Rust setup instructions](./docs/rust-setup.md).
+Setup instructions for working with the [Rust](https://www.rust-lang.org/) programming language can
+be found at the
+[Substrate Developer Hub](https://substrate.dev/docs/en/knowledgebase/getting-started). Follow those
+steps to install [`rustup`](https://rustup.rs/) and configure the Rust toolchain to default to the
+latest stable version.
 
-### Run
+### Makefile
 
-Use Rust's native `cargo` command to build and launch the template node:
+This project uses a [Makefile](Makefile) to document helpful commands and make it easier to execute
+them. Get started by running these [`make`](https://www.gnu.org/software/make/manual/make.html)
+targets:
 
-```sh
-cargo run --release -- --dev --tmp
-```
+1. `make init` - Run the [init script](scripts/init.sh) to configure the Rust toolchain for
+   [WebAssembly compilation](https://substrate.dev/docs/en/knowledgebase/getting-started/#webassembly-compilation).
+1. `make run` - Build and launch this project in development mode.
+
+The init script and Makefile both specify the version of the
+[Rust nightly compiler](https://substrate.dev/docs/en/knowledgebase/getting-started/#rust-nightly-toolchain)
+that this project depends on.
 
 ### Build
 
@@ -33,6 +37,12 @@ without launching it:
 
 ```sh
 cargo build --release
+```
+or you and `cargo build` or `cargo build --release` to build it. and you can run `cargo test` to run the tests.
+```
+ cargo build 
+ or 
+ cargo test
 ```
 
 ### Embedded Docs
