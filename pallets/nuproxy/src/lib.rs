@@ -127,6 +127,8 @@ pub mod pallet {
 		InValidPeriod,
 		/// convert failed from blocknumber to i32
 		ConvertFailed,
+		/// only one watcher
+		OnlyOneWatcher,
 	}
 
 	#[pallet::hooks]
@@ -137,11 +139,12 @@ pub mod pallet {
 	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
 	#[pallet::call]
 	impl<T:Config> Pallet<T> {
-		
+		/// register the watcher
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn register_watcher(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			ensure!(!Self::exist_watcher(who.clone()),Error::<T>::AlreadyExist);
+			ensure!(<Watchers<T>>::iter().count() as u64 <= 1,Error::<T>::OnlyOneWatcher);
 			<Watchers<T>>::insert(who.clone(),1);
 			Ok(())
 		}
