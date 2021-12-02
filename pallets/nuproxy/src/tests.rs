@@ -27,17 +27,23 @@ fn correct_error_for_none_value() {
 #[test]
 fn it_works_for_set_watcher() {
 	new_test_ext().execute_with(|| {
+		// assert_ok!(NuLinkProxy::register_watcher(Origin::signed(1)));
+		// assert_ok!(NuLinkProxy::register_watcher(Origin::signed(2)));
+		// assert_ok!(NuLinkProxy::register_watcher(Origin::signed(3)));
+		// assert_ok!(NuLinkProxy::register_watcher(Origin::signed(4)));
+		// assert_noop!(NuLinkProxy::register_watcher(Origin::signed(2)),Error::<Test>::AlreadyExist);
+		// assert_noop!(NuLinkProxy::register_watcher(Origin::signed(4)),Error::<Test>::AlreadyExist);
+		//
+		// assert_eq!(NuLinkProxy::exist_watcher(1),true);
+		// assert_eq!(NuLinkProxy::exist_watcher(3),true);
+		// assert_eq!(NuLinkProxy::exist_watcher(5),false);
+		// assert_eq!(NuLinkProxy::exist_watcher(6),false);
+		// only one watcher
 		assert_ok!(NuLinkProxy::register_watcher(Origin::signed(1)));
-		assert_ok!(NuLinkProxy::register_watcher(Origin::signed(2)));
-		assert_ok!(NuLinkProxy::register_watcher(Origin::signed(3)));
-		assert_ok!(NuLinkProxy::register_watcher(Origin::signed(4)));
-		assert_noop!(NuLinkProxy::register_watcher(Origin::signed(2)),Error::<Test>::AlreadyExist);
-		assert_noop!(NuLinkProxy::register_watcher(Origin::signed(4)),Error::<Test>::AlreadyExist);
-
+		assert_noop!(NuLinkProxy::register_watcher(Origin::signed(1)),Error::<Test>::AlreadyExist);
+		assert_noop!(NuLinkProxy::register_watcher(Origin::signed(2)),Error::<Test>::OnlyOneWatcher);
 		assert_eq!(NuLinkProxy::exist_watcher(1),true);
-		assert_eq!(NuLinkProxy::exist_watcher(3),true);
-		assert_eq!(NuLinkProxy::exist_watcher(5),false);
-		assert_eq!(NuLinkProxy::exist_watcher(6),false);
+		assert_eq!(NuLinkProxy::exist_watcher(2),false);
 	});
 }
 

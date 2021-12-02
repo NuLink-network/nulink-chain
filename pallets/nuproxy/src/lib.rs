@@ -140,11 +140,13 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T:Config> Pallet<T> {
 		/// register the watcher
+		/// ps: Only supports one watcher for the time being
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn register_watcher(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			ensure!(!Self::exist_watcher(who.clone()),Error::<T>::AlreadyExist);
-			ensure!(<Watchers<T>>::iter().count() as u64 <= 1,Error::<T>::OnlyOneWatcher);
+			let count = <Watchers<T>>::iter().count() as u64;
+			ensure!(count < 1 ,Error::<T>::OnlyOneWatcher);
 			<Watchers<T>>::insert(who.clone(),1);
 			Ok(())
 		}
