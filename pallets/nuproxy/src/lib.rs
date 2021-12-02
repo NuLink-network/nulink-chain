@@ -137,9 +137,9 @@ pub mod pallet {
 	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
 	#[pallet::call]
 	impl<T:Config> Pallet<T> {
-
+		
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn set_watcher(origin: OriginFor<T>) -> DispatchResult {
+		pub fn register_watcher(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			ensure!(!Self::exist_watcher(who.clone()),Error::<T>::AlreadyExist);
 			<Watchers<T>>::insert(who.clone(),1);
