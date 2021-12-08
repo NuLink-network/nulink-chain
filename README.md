@@ -100,13 +100,14 @@ A simple way to use NULINK-NETWORK to distribute rewards to all stakers used loc
 3. deposit local asset for reward
 4. claim reward by staker
 5. create policy by user
-6. view the result
+6. revoke policy by user
 ```
 
 ### Register Watcher
 Before using the Pallet, you need to register the watcher first. After the registration is successful, the watcher can submit the registered staker information and update the staker information regularly.
 ps: Only supports one watcher for the time being.
 we can register watcher with the inherent user `alice` and submit an extrinsicz with `nuproxy.register_watcher` function.
+
 1. `origin`: the owner of the watcher,on this,it's `alice`.
 
 ### Deploy The Staker By Watcher
@@ -125,17 +126,23 @@ Before deploy the staker infos, it must be deposit assets(Local asset[`NLK`]) to
 2. `amount`: the amount of the local asset(NLK).
 
 ### Claim Reward By Staker
-Now staker users can receive rewards after each epoch,we can submit an extrinsicz with `nuproxy.claim_reward_by_staker` to claim it's rewards.
+Now stakers users can receive rewards after each epoch,we can submit an extrinsicz with `nuproxy.claim_reward_by_staker` to claim it's rewards.
 
 1. `origin`: the staker user account.
 2. `amount`: the amount of the local asset(NLK).
 
 ### Create Policy By User
-We can use `nuproxy.create_policy` to create policy by user and set the key params to nulink network.
+We can use `policy.create_policy` to create policy by user and set the key params to nulink network.
 
 1. `origin`: the user account(`alice`) can create policy.
 2. `pid`: the ID of the policy,produced by the user on outside.
-3. `amount`: the amount of the local asset(NlK),used to reward for the staker
+3. `amount`: the amount of the local asset(NlK),used to reward for the staker.
 4. `period`: Indicates the time range for the staker to process the policy,calculated by the number of blocknumbers.
 5. `stakers`: the worker of the nulink network,it works for the crypto newwork.
 
+### Revoke Policy By User
+We can use `policy.revoke_policy` to revoke the policy by user before they create it. If the reward for this policy is left, it will all be returned to the creator。
+Finally, the user who use the revoke policy can check their remaining balance(NLK) with `Balance::free_balance`.
+
+1. `origin`: the user account(`alice`) who had create the policy.
+2. `pid`: the ID of the policy,produced by the user on outside.
