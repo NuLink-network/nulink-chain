@@ -49,7 +49,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn policys)]
 	/// Metadata of an staker.
-	pub type Polices<T: Config> = StorageMap<_, Blake2_128Concat, PolicyID,
+	pub type Policies<T: Config> = StorageMap<_, Blake2_128Concat, PolicyID,
 		PolicyInfo<T::AccountId,T::BlockNumber>,
 		ValueQuery>;
 
@@ -122,10 +122,10 @@ impl<T: Config> Pallet<T>  {
 	///
 	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,amount: T::Balance,period: T::BlockNumber,
 							  stakers: Vec<T::AccountId>) -> DispatchResult {
-		ensure!(!Polices::<T>::contains_key(pid), Error::<T>::RepeatPolicyID);
+		ensure!(!Policies::<T>::contains_key(pid), Error::<T>::RepeatPolicyID);
 		// reserve the asset
 
-		Polices::<T>::insert(pid, PolicyInfo{
+		Policies::<T>::insert(pid, PolicyInfo{
 			pID:	pid.clone(),
 			period: period,
 			policyStart:  frame_system::Pallet::<T>::block_number() + One::one(),
@@ -140,9 +140,9 @@ impl<T: Config> Pallet<T>  {
 		Ok(())
 	}
 	pub fn base_revoke_policy(pid: PolicyID,owner: T::AccountId) -> DispatchResult {
-		ensure!(Polices::<T>::contains_key(pid), Error::<T>::NotFoundPolicyID);
+		ensure!(Policies::<T>::contains_key(pid), Error::<T>::NotFoundPolicyID);
 
-		Polices::<T>::try_mutate(pid,|policy| -> DispatchResult{
+		Policies::<T>::try_mutate(pid, |policy| -> DispatchResult{
 			let cur = frame_system::Pallet::<T>::block_number();
 			ensure!(cur > policy.policyStart, Error::<T>::PolicyOverPeriod);
 			ensure!(policy.policyStop >= cur, Error::<T>::PolicyOverPeriod);
@@ -152,8 +152,8 @@ impl<T: Config> Pallet<T>  {
 		})
 	}
 	pub fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
-		ensure!(Polices::<T>::contains_key(pid), Error::<T>::NotFoundPolicyID);
-		let info = Polices::<T>::get(pid);
+		ensure!(Policies::<T>::contains_key(pid), Error::<T>::NotFoundPolicyID);
+		let info = Policies::<T>::get(pid);
 		Ok(info.clone())
 	}
 }

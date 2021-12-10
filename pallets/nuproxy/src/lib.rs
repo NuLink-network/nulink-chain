@@ -150,9 +150,9 @@ pub mod pallet {
 			<Watchers<T>>::insert(who.clone(),1);
 			Ok(())
 		}
-		/// update the staker infos and calc reward by epoch with the called by watchers.
-		/// update the staker infos from ethereum network and reward it in every epoch if
-		/// it still works in the ethereum. If it stops working, the watcher will periodically
+		/// Update the staker infos and calculate rewards each epoch, will called by watchers.
+		/// Update the staker infos from ethereum network and incentive stakers every epoch if
+		/// the staker still works in the ethereum. If staker stops working, the watcher will periodically
 		/// notify the nulink network and stop rewarding it.
 		///
 		/// `infos`: the new stakers in next epoch from ethereum by watcher set.
@@ -205,7 +205,7 @@ pub mod pallet {
 }
 
 impl<T: Config> Pallet<T>  {
-	/// The account ID of the treasury pot.
+	/// The account ID of the treasury.
     ///
     /// This actually does computation. If you need to keep using it, then make sure you cache the
     /// value and only call this once.
@@ -250,8 +250,8 @@ impl<T: Config> Pallet<T>  {
 	pub fn get_staker_reward_by_coinbase(account: T::AccountId) -> BalanceOf<T> {
 		Rewards::<T>::get(account)
 	}
-	/// first,make all old staker is stopping `iswork=false`,if the staker which in `old` still in next
-	/// epoch will be added again.
+	/// First,make all old stakers stopping `iswork=false`.
+	/// If the staker which in `old` still in next epoch will be added again.
 	/// add the new stakers in to the nulink.
 	pub fn update_stakers(new_stakers: Vec<StakeInfo<T::AccountId,BalanceOf<T>>>) -> DispatchResult {
 
@@ -275,9 +275,9 @@ impl<T: Config> Pallet<T>  {
 		}
 		Ok(())
 	}
-	/// In each epoch, the nulink start to allocate a fixed reward to all stakers, and all stakers will
-	/// distribute the reward proportionally according to their stake.
-	/// the staker can claim their reward in any time.
+	/// In each epoch, the nulink start to allocate a fixed reward to all stakers, and rewards will
+	/// be distributed proportionally according to the stakers' stake.
+	/// the stakers can claim their rewards in any time.
 	pub fn mint_by_staker(all_reward: BalanceOf<T>) -> DispatchResult {
 		let total = Self::get_total_staking();
 		let cur_all_reward: Vec<_> = Stakers::<T>::iter()
