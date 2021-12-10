@@ -175,11 +175,20 @@ pub mod pallet {
 			Self::base_reward(staker,amount)
 		}
 		
+		/// The user who revokes the policy can claim the remaining assets(NLK) 
+		/// from the creation of the policy store.
+		///
+		/// Origin must be Signed,the user account who revoked the policy.
+		/// `amount`: the amount asset(NLK) to be claimed.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn claim_reward_by_user(origin: OriginFor<T>,amount: BalanceOf<T>) -> DispatchResult {
 			let account = ensure_signed(origin)?;
 			Self::base_reward(account,amount)
 		}
+		/// it wiil reserve asset(NLK) to vault for reward stakers by every epoch.
+		///
+		///  Origin must be Signed.
+		/// `amount`: the amount asset(NLK) to be reserve.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn reserve_to_vault(origin: OriginFor<T>,amount: BalanceOf<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
