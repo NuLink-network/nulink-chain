@@ -106,7 +106,7 @@ pub mod pallet {
 			Self::base_create_policy(owner,pid,amount,period,stakers)
 		}
 		/// revoke the policy by user before they create it. If the reward for this policy
-		/// is left, it will all be returned to the creator。
+		/// is left, it will all be returned to the creator.
 		///
 		/// Origin must be Signed.
 		/// `pid`: the ID of the policy,produced by the user on outside.

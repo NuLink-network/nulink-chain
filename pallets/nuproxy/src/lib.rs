@@ -234,10 +234,12 @@ impl<T: Config> Pallet<T>  {
 		s.lockedBalance = Zero::zero();
 		T::Hashing::hash_of(&s)
 	}
+	/// calc all reward for stakers by every epoch trigger by watcher.
 	pub fn calc_reward_by_epoch() -> BalanceOf<T> {
 		let unit = T::RewardUnit::get();
 		One::one()
 	}
+	/// get all balance by all staker's staking
 	pub fn get_total_staking() -> BalanceOf<T> {
 		Stakers::<T>::iter()
 			.filter(|(_,val)| val.iswork)
@@ -256,6 +258,7 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		for k in unused { Watchers::<T>::remove(&k); }
 	}
+	/// get amount of the reward by stake's coinbase.
 	pub fn get_staker_reward_by_coinbase(account: T::AccountId) -> BalanceOf<T> {
 		Rewards::<T>::get(account)
 	}
@@ -330,6 +333,7 @@ impl<T: Config> Pallet<T>  {
 			T::Currency::transfer(&valut,&account,amount,AllowDeath)
 		})
 	}
+	/// get staker key for staker's coinbase field
 	pub fn coinbase_to_staker_key(accounts: Vec<T::AccountId>) -> Vec<T::Hash> {
 		let keys: Vec<_> = Stakers::<T>::iter()
 			.filter(|(_,val)| {
@@ -339,10 +343,11 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		keys
 	}
+	/// get the policy info from policyID by use the other pallet storage
 	pub fn get_policy_by_pallet(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
 		T::GetPolicyInfo::get_policy_info_by_pid(pid)
 	}
-	/// All staker members share the policy rewards
+	/// All staker members share the policy rewards.
 	pub fn assigned_by_policy_reward(keys: Vec<T::AccountId>,allAmount: BalanceOf<T>) -> DispatchResult {
 		let count = keys.len();
 		let amount = allAmount / <BalanceOf<T>>::from(count  as u32);
@@ -355,7 +360,7 @@ impl<T: Config> Pallet<T>  {
 		}
 		Ok(())
 	}
-	/// calc every policy reward by epoch
+	/// calc every policy reward by epoch.
 	pub fn calc_reward_in_policy(num: T::BlockNumber,pid: PolicyID) -> DispatchResult {
 		ensure!(PolicyReserve::<T>::contains_key(pid), Error::<T>::NoReserve);
 
