@@ -212,13 +212,22 @@ impl<T: Config> Pallet<T>  {
 	pub fn account_id() -> T::AccountId {
 		T::PalletId::get().into_account()
 	}
+	/// the balance(local balance(NLK)) of the vault.
+	///
+	/// the vault's balance can reserved by any user use local balance.
 	pub fn vault_balance() -> BalanceOf<T> {
 		let vault = Self::account_id();
 		T::Currency::free_balance(&vault)
 	}
+	/// get all stakers in the pallet.
+	///
+	/// include all stakers include those that are no longer working.
 	pub fn get_staker_count() -> u64 {
 		return Stakers::<T>::iter().count() as u64;
 	}
+	/// calc staker hash with coinbase,workbase,workcount field.
+	///
+	/// iswork = false and lockedBalance = 0. it is w
 	pub fn calc_staker_hash(staker: StakeInfo<T::AccountId,BalanceOf<T>>) -> T::Hash {
 		let mut s = staker.clone();
 		s.iswork = false;
