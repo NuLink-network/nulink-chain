@@ -31,5 +31,5 @@ pub trait BasePolicy<AccountId,Balance,PolicyID> {
 }
 
 impl<AccountId, Balance, PolicyID> BasePolicy<AccountId, Balance, PolicyID> for () {
-	fn create_policy(who: AccountId,amount: Balance,pid: PolicyID) -> DispatchResult {Ok(())}
+	fn create_policy(_who: AccountId,_amount: Balance,_pid: PolicyID) -> DispatchResult {Ok(())}
 }
