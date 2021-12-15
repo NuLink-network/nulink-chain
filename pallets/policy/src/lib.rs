@@ -126,11 +126,11 @@ impl<T: Config> Pallet<T>  {
 		// reserve the asset
 
 		Policies::<T>::insert(pid, PolicyInfo{
-			pID:	pid.clone(),
+			p_id:	pid.clone(),
 			period: period,
-			policyStart:  frame_system::Pallet::<T>::block_number() + One::one(),
-			policyStop:  period + frame_system::Pallet::<T>::block_number() + One::one(),
-			policyOwner: owner.clone(),
+			policy_start:  frame_system::Pallet::<T>::block_number() + One::one(),
+			policy_stop:  period + frame_system::Pallet::<T>::block_number() + One::one(),
+			policy_owner: owner.clone(),
 			stackers: stakers.clone(),
 		});
 		T::PolicyHandle::create_policy(owner.clone(),amount,pid.clone())?;
@@ -144,10 +144,10 @@ impl<T: Config> Pallet<T>  {
 
 		Policies::<T>::try_mutate(pid, |policy| -> DispatchResult{
 			let cur = frame_system::Pallet::<T>::block_number();
-			ensure!(cur > policy.policyStart, Error::<T>::PolicyOverPeriod);
-			ensure!(policy.policyStop >= cur, Error::<T>::PolicyOverPeriod);
-			ensure!(policy.policyOwner == owner, Error::<T>::NotPolicyOwner);
-			policy.policyStop = cur;
+			ensure!(cur > policy.policy_start, Error::<T>::PolicyOverPeriod);
+			ensure!(policy.policy_stop >= cur, Error::<T>::PolicyOverPeriod);
+			ensure!(policy.policy_owner == owner, Error::<T>::NotPolicyOwner);
+			policy.policy_stop = cur;
 			Ok(())
 		})
 	}

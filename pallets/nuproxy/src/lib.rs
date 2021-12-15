@@ -366,16 +366,16 @@ impl<T: Config> Pallet<T>  {
 
 		match Self::get_policy_by_pallet(pid) {
 			Ok(info) => {
-				ensure!(num >= info.policyStart, Error::<T>::LowBlockNumber);
+				ensure!(num >= info.policy_start, Error::<T>::LowBlockNumber);
 				ensure!(info.period > Zero::zero(), Error::<T>::InValidPeriod);
 				let range: u32 = info.period.try_into().map_err(|_| Error::<T>::ConvertFailed)?;
 
 				if let (user,reserve,last) = PolicyReserve::<T>::get(pid) {
 					let mut lastAssign = last;
 					if lastAssign == Zero::zero() {
-						lastAssign = info.policyStart;
+						lastAssign = info.policy_start;
 					}
-					if lastAssign >= info.policyStop || reserve == Zero::zero() {
+					if lastAssign >= info.policy_stop || reserve == Zero::zero() {
 						// the user stop the policy or Deplete all assets
 						if reserve > Zero::zero() {
 							Rewards::<T>::mutate(user.clone(), |val| -> DispatchResult {
@@ -391,8 +391,8 @@ impl<T: Config> Pallet<T>  {
 						return Ok(())
 					}
 					let mut stop = num;
-					if num > info.policyStop {
-						stop = info.policyStop;
+					if num > info.policy_stop {
+						stop = info.policy_stop;
 					}
 					ensure!(stop >= lastAssign, Error::<T>::LowBlockNumber);
 					let useblock: u32 = (stop - lastAssign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;

@@ -7,10 +7,10 @@
     "PolicyID": "u128",
   
     "PolicyInfo": {
-        "pID": "PolicyID",
-        "policyStart": "BlockNumber",
+        "p_id": "PolicyID",
+        "policy_start": "BlockNumber",
         "period": "BlockNumber",
-        "policyStop": "BlockNumber",
+        "policy_stop": "BlockNumber",
         "stackers": "Vec<AccountId>"
     },
     "StakeInfo": {

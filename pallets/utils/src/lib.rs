@@ -12,11 +12,11 @@ pub type PolicyID = u128;
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default)]
 pub struct PolicyInfo<AccountId,BlockNumber> {
-	pub pID: PolicyID,
-	pub policyStart: BlockNumber,
+	pub p_id: PolicyID,
+	pub policy_start: BlockNumber,
 	pub period: BlockNumber,
-	pub policyStop: BlockNumber,
-	pub policyOwner:  AccountId,
+	pub policy_stop: BlockNumber,
+	pub policy_owner:  AccountId,
 	pub stackers:  Vec<AccountId>,
 }
 
