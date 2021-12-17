@@ -7,7 +7,7 @@
 pub use pallet::*;
 
 use sp_runtime::{traits::{
-	AtLeast32BitUnsigned, One, Saturating, StaticLookup, Zero, Hash,
+	AtLeast32BitUnsigned, One, Saturating,
 }, DispatchError};
 use frame_support::{ensure,dispatch::DispatchResult,inherent::Vec, pallet_prelude::*};
 use codec::MaxEncodedLen;
