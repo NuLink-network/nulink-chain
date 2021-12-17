@@ -3,7 +3,7 @@
 use super::*;
 use frame_support::pallet_prelude::*;
 
-use frame_support::traits::{fungible, Currency};
+use frame_support::traits::{Currency};
 use sp_runtime::{traits::Convert, FixedPointNumber, FixedPointOperand, FixedU128};
 
 
