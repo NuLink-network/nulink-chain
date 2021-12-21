@@ -237,7 +237,8 @@ impl<T: Config> Pallet<T>  {
 	/// calc all reward for stakers by every epoch trigger by watcher.
 	pub fn calc_reward_by_epoch() -> BalanceOf<T> {
 		let unit = T::RewardUnit::get();
-		One::one()
+		unit
+		// One::one()
 	}
 	/// get all balance by all staker's staking
 	pub fn get_total_staking() -> BalanceOf<T> {
