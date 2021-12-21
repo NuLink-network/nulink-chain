@@ -361,6 +361,8 @@ impl<T: Config> Pallet<T>  {
 		Ok(())
 	}
 	/// calc every policy reward by epoch.
+	///
+	/// when `useblock == 0`,it means the user was revoke the policy and stop it.
 	pub fn calc_reward_in_policy(num: T::BlockNumber,pid: PolicyID) -> DispatchResult {
 		ensure!(PolicyReserve::<T>::contains_key(pid), Error::<T>::NoReserve);
 
@@ -398,7 +400,6 @@ impl<T: Config> Pallet<T>  {
 					let useblock: u32 = (stop - lastAssign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;
 
 					if useblock == 0 {
-						/// user was revoke the policy and stop it
 						return Ok(())
 					}
 					let mut all = reserve * <BalanceOf<T>>::from(useblock) / <BalanceOf<T>>::from(range);
