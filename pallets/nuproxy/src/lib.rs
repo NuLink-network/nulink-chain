@@ -15,8 +15,8 @@ mod types;
 
 pub use pallet::*;
 use sp_runtime::{traits::{
-	AtLeast32BitUnsigned, One, CheckedAdd, CheckedSub,
-	Saturating, StaticLookup, Zero,Hash,AccountIdConversion,
+	AtLeast32BitUnsigned, One, CheckedSub,
+	Saturating, Zero,Hash,AccountIdConversion,
 }};
 use sp_std::convert::TryInto;
 pub use types::{StakeInfo};
