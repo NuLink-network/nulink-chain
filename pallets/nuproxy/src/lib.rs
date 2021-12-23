@@ -349,9 +349,9 @@ impl<T: Config> Pallet<T>  {
 		T::GetPolicyInfo::get_policy_info_by_pid(pid)
 	}
 	/// All staker members share the policy rewards.
-	pub fn assigned_by_policy_reward(keys: Vec<T::AccountId>,allAmount: BalanceOf<T>) -> DispatchResult {
+	pub fn assigned_by_policy_reward(keys: Vec<T::AccountId>, all_amount: BalanceOf<T>) -> DispatchResult {
 		let count = keys.len();
-		let amount = allAmount / <BalanceOf<T>>::from(count  as u32);
+		let amount = all_amount / <BalanceOf<T>>::from(count  as u32);
 		for i in 0..count {
 			Rewards::<T>::mutate(keys[i].clone(),|b| -> DispatchResult {
 				let new_amount = b.saturating_add(amount);
@@ -374,11 +374,11 @@ impl<T: Config> Pallet<T>  {
 				let range: u32 = info.period.try_into().map_err(|_| Error::<T>::ConvertFailed)?;
 
 				if let (user,reserve,last) = PolicyReserve::<T>::get(pid) {
-					let mut lastAssign = last;
-					if lastAssign == Zero::zero() {
-						lastAssign = info.policy_start;
+					let mut last_assign = last;
+					if last_assign == Zero::zero() {
+						last_assign = info.policy_start;
 					}
-					if lastAssign >= info.policy_stop || reserve == Zero::zero() {
+					if last_assign >= info.policy_stop || reserve == Zero::zero() {
 						// the user stop the policy or Deplete all assets
 						if reserve > Zero::zero() {
 							Rewards::<T>::mutate(user.clone(), |val| -> DispatchResult {
@@ -397,8 +397,8 @@ impl<T: Config> Pallet<T>  {
 					if num > info.policy_stop {
 						stop = info.policy_stop;
 					}
-					ensure!(stop >= lastAssign, Error::<T>::LowBlockNumber);
-					let useblock: u32 = (stop - lastAssign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;
+					ensure!(stop >= last_assign, Error::<T>::LowBlockNumber);
+					let useblock: u32 = (stop - last_assign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;
 
 					if useblock == 0 {
 						return Ok(())
