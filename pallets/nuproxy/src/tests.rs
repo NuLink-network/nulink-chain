@@ -122,16 +122,16 @@ fn it_works_for_mint_in_epoch() {
 		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase.clone()),0);
 		assert_ok!(NuLinkProxy::mint_by_staker(100));
 		let allStaking = NuLinkProxy::get_total_staking();
-		let v3 =  staker3.lockedBalance * 100 / allStaking;
-		let v2 = staker2.lockedBalance * 100 / allStaking;
+		let v3 =  staker3.locked_balance * 100 / allStaking;
+		let v2 = staker2.locked_balance * 100 / allStaking;
 		let v1 = 100 - v2 -v3;
 		assert_eq!(v1,NuLinkProxy::get_staker_reward_by_coinbase(staker1.coinbase));
 		assert_eq!(v2,NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase));
 		assert_eq!(v3,NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase));
 		// mint again
 		assert_ok!(NuLinkProxy::mint_by_staker(200));
-		let vv3 = staker3.lockedBalance * 200 / allStaking;
-		let vv2 = staker2.lockedBalance * 200 / allStaking;
+		let vv3 = staker3.locked_balance * 200 / allStaking;
+		let vv2 = staker2.locked_balance * 200 / allStaking;
 		let vv1 = 200 - vv2 - vv3;
 		assert_eq!(v1+vv1,NuLinkProxy::get_staker_reward_by_coinbase(staker1.coinbase));
 		assert_eq!(v2+vv2,NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase));
@@ -224,8 +224,8 @@ fn it_works_for_claim_reward() {
 		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase.clone()),0);
 		assert_ok!(NuLinkProxy::mint_by_staker(100));
 		let allStaking = NuLinkProxy::get_total_staking();
-		let v3 =  staker3.lockedBalance * 100 / allStaking;
-		let v2 = staker2.lockedBalance * 100 / allStaking;
+		let v3 =  staker3.locked_balance * 100 / allStaking;
+		let v2 = staker2.locked_balance * 100 / allStaking;
 		let v1 = 100 - v2 -v3;
 		assert_eq!(v1,NuLinkProxy::get_staker_reward_by_coinbase(staker1.coinbase));
 		assert_eq!(v2,NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase));

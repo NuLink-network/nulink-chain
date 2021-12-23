@@ -227,11 +227,11 @@ impl<T: Config> Pallet<T>  {
 	}
 	/// calc staker hash with coinbase,workbase,workcount field.
 	///
-	/// iswork = false and lockedBalance = 0. it is w
+	/// iswork = false and locked_balance = 0. it is w
 	pub fn calc_staker_hash(staker: StakeInfo<T::AccountId,BalanceOf<T>>) -> T::Hash {
 		let mut s = staker.clone();
 		s.iswork = false;
-		s.lockedBalance = Zero::zero();
+		s.locked_balance = Zero::zero();
 		T::Hashing::hash_of(&s)
 	}
 	/// calc all reward for stakers by every epoch trigger by watcher.
@@ -246,7 +246,7 @@ impl<T: Config> Pallet<T>  {
 			.filter(|(_,val)| val.iswork)
 			.map(|(_,val)| val.clone())
 			.fold(Zero::zero(),|acc,v|{
-				acc + v.lockedBalance
+				acc + v.locked_balance
 			})
 	}
 	pub fn exist_watcher(watcher: T::AccountId) -> bool {
@@ -296,7 +296,7 @@ impl<T: Config> Pallet<T>  {
 		let cur_all_reward: Vec<_> = Stakers::<T>::iter()
 			.filter(|(_,val)| val.iswork)
 			.map(|(_,val)| {
-				let reward = (val.lockedBalance.clone() * all_reward.clone()) / total.clone();
+				let reward = (val.locked_balance.clone() * all_reward.clone()) / total.clone();
 				(val.coinbase.clone(),reward)
 			})
 			.collect();

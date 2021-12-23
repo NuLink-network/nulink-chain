@@ -109,7 +109,7 @@ pub fn make_stake_infos(id: u64,lock_balance: u64,count: u32) -> StakeInfo<<Test
 		coinbase: id.clone(),
 		workbase: [0;32],
 		iswork: true,
-		lockedBalance: lock_balance,
+		locked_balance: lock_balance,
 		workcount: count,
 	}
 }

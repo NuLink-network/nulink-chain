@@ -15,6 +15,6 @@ pub struct StakeInfo<AccountId,Balance> {
     pub(super) coinbase: AccountId,
     pub(super) workbase: [u8;32],
     pub(super) iswork:  bool,               // no hash field
-    pub(super) lockedBalance:  Balance,     // no hash field
+    pub(super) locked_balance:  Balance,     // no hash field
     pub(super) workcount:   u32,
 }
