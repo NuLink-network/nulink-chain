@@ -316,7 +316,7 @@ impl<T: Config> Pallet<T>  {
 				let amount = b.saturating_add(left.clone());
 				*b = amount;
 				Ok(())
-			});
+			}).unwrap();
 		}
 		Ok(())
 	}
@@ -357,7 +357,7 @@ impl<T: Config> Pallet<T>  {
 				let new_amount = b.saturating_add(amount);
 				*b = new_amount;
 				Ok(())
-			});
+			}).unwrap();
 		}
 		Ok(())
 	}
@@ -385,11 +385,11 @@ impl<T: Config> Pallet<T>  {
 								let new_amount = val.saturating_add(reserve);
 								*val = new_amount;
 								Ok(())
-							});
+							}).unwrap();
 							PolicyReserve::<T>::mutate(pid,|x|->DispatchResult {
 								x.1 = Zero::zero();
 								Ok(())
-							});
+							}).unwrap();
 						}
 						return Ok(())
 					}
