@@ -430,7 +430,7 @@ impl<T: Config> Pallet<T>  {
 	/// `num`: the reward assignment by the block numbers.
 	pub fn reward_in_epoch(num: T::BlockNumber) -> DispatchResult {
 		PolicyReserve::<T>::iter().for_each(|(k,_)|{
-			Self::calc_reward_in_policy(num,k);
+			Self::calc_reward_in_policy(num,k).unwrap();
 		});
 		Ok(())
 	}
