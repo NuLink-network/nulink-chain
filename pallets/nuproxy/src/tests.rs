@@ -14,13 +14,9 @@ fn it_works_for_default_value() {
 }
 
 #[test]
-fn correct_error_for_none_value() {
+fn it_work_for_init_staker() {
 	new_test_ext().execute_with(|| {
-		// Ensure the expected error is thrown when no value is present.
-		// assert_noop!(
-		// 	NuLinkProxy::cause_error(Origin::signed(1)),
-		// 	Error::<Test>::NoneValue
-		// );
+		assert_eq!(NuLinkProxy::get_staker_count(),0);
 	});
 }
 
@@ -121,17 +117,17 @@ fn it_works_for_mint_in_epoch() {
 		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase.clone()),0);
 		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase.clone()),0);
 		assert_ok!(NuLinkProxy::mint_by_staker(100));
-		let allStaking = NuLinkProxy::get_total_staking();
-		let v3 =  staker3.locked_balance * 100 / allStaking;
-		let v2 = staker2.locked_balance * 100 / allStaking;
+		let all_staking = NuLinkProxy::get_total_staking();
+		let v3 =  staker3.locked_balance * 100 / all_staking;
+		let v2 = staker2.locked_balance * 100 / all_staking;
 		let v1 = 100 - v2 -v3;
 		assert_eq!(v1,NuLinkProxy::get_staker_reward_by_coinbase(staker1.coinbase));
 		assert_eq!(v2,NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase));
 		assert_eq!(v3,NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase));
 		// mint again
 		assert_ok!(NuLinkProxy::mint_by_staker(200));
-		let vv3 = staker3.locked_balance * 200 / allStaking;
-		let vv2 = staker2.locked_balance * 200 / allStaking;
+		let vv3 = staker3.locked_balance * 200 / all_staking;
+		let vv2 = staker2.locked_balance * 200 / all_staking;
 		let vv1 = 200 - vv2 - vv3;
 		assert_eq!(v1+vv1,NuLinkProxy::get_staker_reward_by_coinbase(staker1.coinbase));
 		assert_eq!(v2+vv2,NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase));
@@ -141,10 +137,10 @@ fn it_works_for_mint_in_epoch() {
 #[test]
 fn it_works_for_assigned_by_policy_reward() {
 	new_test_ext().execute_with(|| {
-		let allAmount :u64 = 100;
+		let all_amount:u64 = 100;
 		let ids = vec![1 as u64,2,3];
-		assert_ok!(NuLinkProxy::assigned_by_policy_reward(ids.clone(),allAmount));
-		let unit = allAmount / ids.len() as u64;
+		assert_ok!(NuLinkProxy::assigned_by_policy_reward(ids.clone(),all_amount));
+		let unit = all_amount / ids.len() as u64;
 		assert_eq!(unit,NuLinkProxy::get_staker_reward_by_coinbase(1));
 		assert_eq!(unit,NuLinkProxy::get_staker_reward_by_coinbase(2));
 		assert_eq!(unit,NuLinkProxy::get_staker_reward_by_coinbase(3));
@@ -223,9 +219,9 @@ fn it_works_for_claim_reward() {
 		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase.clone()),0);
 		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(staker3.coinbase.clone()),0);
 		assert_ok!(NuLinkProxy::mint_by_staker(100));
-		let allStaking = NuLinkProxy::get_total_staking();
-		let v3 =  staker3.locked_balance * 100 / allStaking;
-		let v2 = staker2.locked_balance * 100 / allStaking;
+		let all_staking = NuLinkProxy::get_total_staking();
+		let v3 =  staker3.locked_balance * 100 / all_staking;
+		let v2 = staker2.locked_balance * 100 / all_staking;
 		let v1 = 100 - v2 -v3;
 		assert_eq!(v1,NuLinkProxy::get_staker_reward_by_coinbase(staker1.coinbase));
 		assert_eq!(v2,NuLinkProxy::get_staker_reward_by_coinbase(staker2.coinbase));

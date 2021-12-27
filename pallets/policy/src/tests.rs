@@ -21,6 +21,8 @@ fn correct_error_for_none_value() {
 		// );
 	});
 }
+
+#[test]
 fn it_works_for_create_policy1() {
 	new_test_ext().execute_with(|| {
 		// create policy
