@@ -2,7 +2,7 @@ use super::*;
 use crate as pallet_nuproxy;
 use sp_core::H256;
 use frame_support::parameter_types;
-use frame_support::{assert_ok, assert_noop};
+use frame_support::{assert_ok};
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup}, testing::Header,
 };
