@@ -107,7 +107,8 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 pub fn make_stake_infos(id: u64,lock_balance: u64,count: u32) -> StakeInfo<<Test as frame_system::Config>::AccountId,u64> {
 	StakeInfo{
 		coinbase: id.clone(),
-		workbase: [0;32],
+		workbase: vec![],
+		// workbase: [0;32],
 		iswork: true,
 		locked_balance: lock_balance,
 		workcount: count,

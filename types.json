@@ -15,7 +15,7 @@
     },
     "StakeInfo": {
         "coinbase": "AccountId",
-        "workbase": "[u8;32]",
+        "workbase": "Vec<u8>",
         "iswork": "bool",
         "lockedBalance": "Balance",
         "workcount": "u32"
