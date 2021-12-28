@@ -2,6 +2,9 @@ use super::*;
 use crate::{Error, mock::*};
 use frame_support::{assert_ok, assert_noop};
 use frame_system::RawOrigin;
+use std::str::FromStr;
+use sp_runtime::testing::H256;
+use sp_std::convert::TryFrom;
 
 #[test]
 fn it_works_for_default_value() {
@@ -17,6 +20,9 @@ fn it_works_for_default_value() {
 fn it_work_for_init_staker() {
 	new_test_ext().execute_with(|| {
 		assert_eq!(NuLinkProxy::get_staker_count(),0);
+		let empty_key: H256 = H256::from_str("0x0000000000000000000000000000000000000000000000000000000000000000").unwrap();
+		assert_eq!(Stakers::<Test>::contains_key(empty_key),false);
+		// let s = Stakers::<Test>::get(empty_key);
 	});
 }
 
