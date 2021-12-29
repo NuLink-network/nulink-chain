@@ -12,6 +12,8 @@ use sp_runtime::{traits::{
 use frame_support::{ensure,dispatch::DispatchResult,inherent::Vec, pallet_prelude::*};
 use codec::MaxEncodedLen;
 use nulink_utils::{BasePolicy,GetPolicyInfo,PolicyID,PolicyInfo};
+#[macro_use]
+extern crate alloc;
 
 #[cfg(test)]
 mod mock;
@@ -48,7 +50,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn policys)]
 	/// Metadata of an staker.
-	pub type Policies<T: Config> = StorageMap<_, Blake2_128Concat, PolicyID,
+	pub(super) type Policies<T: Config> = StorageMap<_, Blake2_128Concat, PolicyID,
 		PolicyInfo<T::AccountId,T::BlockNumber>,
 		ValueQuery>;
 
@@ -79,6 +81,8 @@ pub mod pallet {
 		PolicyOverPeriod,
 		/// the policy not belong to the account
 		NotPolicyOwner,
+		/// at least one staker
+		NotStaker,
 	}
 
 	#[pallet::hooks]
@@ -122,15 +126,23 @@ impl<T: Config> Pallet<T>  {
 	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,amount: T::Balance,period: T::BlockNumber,
 							  stakers: Vec<T::AccountId>) -> DispatchResult {
 		ensure!(!Policies::<T>::contains_key(pid), Error::<T>::RepeatPolicyID);
-		// reserve the asset
+		ensure!(stakers.len() > 0, Error::<T>::NotStaker);
 
+		// let uni = stakers.clone().into_iter().unique();
+		let mut uni_stakers: Vec<T::AccountId> = vec![];
+		for s in stakers {
+			if !uni_stakers.contains(&s) {
+				uni_stakers.push(s.clone());
+			}
+		}
+		// reserve the asset
 		Policies::<T>::insert(pid, PolicyInfo{
 			p_id:	pid.clone(),
 			period: period,
 			policy_start:  frame_system::Pallet::<T>::block_number() + One::one(),
 			policy_stop:  period + frame_system::Pallet::<T>::block_number() + One::one(),
 			policy_owner: owner.clone(),
-			stackers: stakers.clone(),
+			stackers: uni_stakers.clone(),
 		});
 		T::PolicyHandle::create_policy(owner.clone(),amount,pid.clone())?;
 		// Emit an event.
