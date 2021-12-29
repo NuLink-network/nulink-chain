@@ -62,9 +62,36 @@ fn it_works_for_coinbase_to_keys() {
 		let h = NuLinkProxy::coinbase_to_staker_key(accounts);
 		assert_eq!(h.len(),3);
 		println!("{:?}", h);
-		assert_eq!(h[2],NuLinkProxy::calc_staker_hash(staker1.clone()));
-		assert_eq!(h[1],NuLinkProxy::calc_staker_hash(staker2.clone()));
-		assert_eq!(h[0],NuLinkProxy::calc_staker_hash(staker3.clone()));
+		let hh1 = NuLinkProxy::coinbase_to_staker_key(vec![1]);
+		let h1 = NuLinkProxy::calc_staker_hash(staker1.clone());
+		println!("{:?}",h1);
+		assert_eq!(hh1[0],h1);
+
+		let hh2 = NuLinkProxy::coinbase_to_staker_key(vec![2]);
+		let h2 = NuLinkProxy::calc_staker_hash(staker2.clone());
+		println!("{:?}",h2);
+		assert_eq!(hh2[0],h2);
+
+		let hh3 = NuLinkProxy::coinbase_to_staker_key(vec![3]);
+		let h3 = NuLinkProxy::calc_staker_hash(staker3.clone());
+		println!("{:?}",h3);
+		assert_eq!(hh3[0],h3);
+	});
+}
+
+#[test]
+fn it_works_for_stakers1() {
+	new_test_ext().execute_with(|| {
+		// keep the stakers
+		let staker1 = make_stake_infos2(1,true);
+		let staker2 = make_stake_infos2(2,true);
+		let staker3 = make_stake_infos2(3,false);
+		let stakers1 = vec![staker1.clone(),staker2.clone(),staker3.clone()];
+		assert_ok!(NuLinkProxy::update_stakers(stakers1));
+		assert_eq!(NuLinkProxy::valid_staker(1),true);
+		assert_eq!(NuLinkProxy::valid_staker(2),true);
+		assert_eq!(NuLinkProxy::valid_staker(3),false);
+		assert_eq!(NuLinkProxy::valid_staker(4),false);
 	});
 }
 

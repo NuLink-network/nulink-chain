@@ -114,11 +114,21 @@ pub fn make_stake_infos(id: u64,lock_balance: u64,count: u32) -> StakeInfo<<Test
 		workcount: count,
 	}
 }
+pub fn make_stake_infos2(id: u64,is_work: bool) -> StakeInfo<<Test as frame_system::Config>::AccountId,u64> {
+	StakeInfo{
+		coinbase: id.clone(),
+		workbase: vec![],
+		// workbase: [0;32],
+		iswork: is_work,
+		locked_balance: 100,
+		workcount: 0,
+	}
+}
 pub fn create_policy(id: u64,amount: u64,period: u64,policyid: u128,stakers: Vec<u64>) -> u128 {
 	assert_ok!(NulinkPolicy::base_create_policy(id,policyid,amount,period,stakers));
 	policyid
 }
-pub fn set_the_policy(id: u64,value: u64,pid: u128) -> u128 {
-	assert_ok!(NuLinkProxy::create_policy(id,value,pid.clone()));
+pub fn set_the_policy(id: u64,value: u64,pid: u128,stakers: Vec<u64>) -> u128 {
+	assert_ok!(NuLinkProxy::create_policy(id,value,pid.clone(),stakers));
 	pid.clone()
 }

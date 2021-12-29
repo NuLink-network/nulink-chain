@@ -129,6 +129,7 @@ pub mod pallet {
 		ConvertFailed,
 		/// only one watcher
 		OnlyOneWatcher,
+		InvalidStaker,
 	}
 
 	#[pallet::hooks]
@@ -161,7 +162,10 @@ pub mod pallet {
 			let watcher = ensure_signed(origin)?;
 			ensure!(Self::exist_watcher(watcher), Error::<T>::NoWatcher);
 
-			Self::mint_by_staker(Self::calc_reward_by_epoch())?;
+			let all_reward = Self::calc_reward_by_epoch();
+			if Self::vault_balance() >= all_reward {
+				Self::mint_by_staker(all_reward)?;
+			}
 			Self::reward_in_epoch(frame_system::Pallet::<T>::block_number())?;
 			Self::update_stakers(infos)
 		}
@@ -262,6 +266,13 @@ impl<T: Config> Pallet<T>  {
 	/// get amount of the reward by stake's coinbase.
 	pub fn get_staker_reward_by_coinbase(account: T::AccountId) -> BalanceOf<T> {
 		Rewards::<T>::get(account)
+	}
+	pub fn valid_staker(account: T::AccountId) -> bool {
+		let v: Vec<(T::AccountId,bool)> = Stakers::<T>::iter()
+			.filter(|(_,val)| val.iswork && val.coinbase == account)
+			.map(|(_,val)| (val.coinbase.clone(),val.iswork))
+			.collect();
+		v.len() > 0
 	}
 	/// First,make all old stakers stopping `iswork=false`.
 	/// If the staker which in `old` still in next epoch will be added again.
@@ -439,8 +450,12 @@ impl<T: Config> Pallet<T>  {
 
 impl<T: Config> BasePolicy<T::AccountId,BalanceOf<T>,PolicyID> for Pallet<T> {
 	/// policy owner will reserve asset(local asset) to the vault when create policy.
-	fn create_policy(who: T::AccountId,amount: BalanceOf<T>,pid: PolicyID) -> DispatchResult {
+	fn create_policy(who: T::AccountId,amount: BalanceOf<T>,pid: PolicyID,stakers: Vec<T::AccountId>) -> DispatchResult {
 		ensure!(!PolicyReserve::<T>::contains_key(pid), Error::<T>::RepeatReserve);
+		// stakers.iter().for_each(|s| ensure!(!Self::valid_staker(s),Error::<T>::InvalidStaker));
+		for s in stakers {
+			ensure!(Self::valid_staker(s),Error::<T>::InvalidStaker);
+		}
 
 		PolicyReserve::<T>::mutate(pid, |val| -> DispatchResult {
 			*val = (who.clone(),amount,Zero::zero());

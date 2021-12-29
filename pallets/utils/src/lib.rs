@@ -27,9 +27,9 @@ pub trait GetPolicyInfo<AccountId,PolicyID,BlockNumber> {
 
 pub trait BasePolicy<AccountId,Balance,PolicyID> {
 	/// the user create policy and reserve a asset into the vault.
-	fn create_policy(who: AccountId,amount: Balance,pid: PolicyID) -> DispatchResult;
+	fn create_policy(who: AccountId,amount: Balance,pid: PolicyID,stakers: Vec<AccountId>) -> DispatchResult;
 }
 
 impl<AccountId, Balance, PolicyID> BasePolicy<AccountId, Balance, PolicyID> for () {
-	fn create_policy(_who: AccountId,_amount: Balance,_pid: PolicyID) -> DispatchResult {Ok(())}
+	fn create_policy(_who: AccountId,_amount: Balance,_pid: PolicyID,_stakers: Vec<AccountId>) -> DispatchResult {Ok(())}
 }

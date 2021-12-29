@@ -144,7 +144,7 @@ impl<T: Config> Pallet<T>  {
 			policy_owner: owner.clone(),
 			stackers: uni_stakers.clone(),
 		});
-		T::PolicyHandle::create_policy(owner.clone(),amount,pid.clone())?;
+		T::PolicyHandle::create_policy(owner.clone(),amount,pid.clone(),uni_stakers.clone())?;
 		// Emit an event.
 		Self::deposit_event(Event::CreateNewPolicy(pid, owner.clone()));
 
