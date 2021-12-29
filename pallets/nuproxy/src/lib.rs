@@ -454,7 +454,10 @@ impl<T: Config> BasePolicy<T::AccountId,BalanceOf<T>,PolicyID> for Pallet<T> {
 		ensure!(!PolicyReserve::<T>::contains_key(pid), Error::<T>::RepeatReserve);
 		// stakers.iter().for_each(|s| ensure!(!Self::valid_staker(s),Error::<T>::InvalidStaker));
 		for s in stakers {
-			ensure!(Self::valid_staker(s),Error::<T>::InvalidStaker);
+			if !Self::valid_staker(s) {
+				return Err(Error::<T>::InvalidStaker.into());
+			}
+			// ensure!(Self::valid_staker(s),Error::<T>::InvalidStaker);
 		}
 
 		PolicyReserve::<T>::mutate(pid, |val| -> DispatchResult {

@@ -94,7 +94,22 @@ fn it_works_for_stakers1() {
 		assert_eq!(NuLinkProxy::valid_staker(4),false);
 	});
 }
+#[test]
+fn it_works_for_stakers_and_policy() {
+	new_test_ext().execute_with(|| {
+		// keep the stakers
+		let staker1 = make_stake_infos2(1,true);
+		let staker2 = make_stake_infos2(2,true);
+		let staker3 = make_stake_infos2(3,false);
+		let stakers1 = vec![staker1.clone(),staker2.clone(),staker3.clone()];
+		assert_ok!(NuLinkProxy::update_stakers(stakers1));
 
+		assert_ok!(NulinkPolicy::base_create_policy(OWNER.clone(),111,10,10,vec![1,2]));
+		assert_ok!(NulinkPolicy::base_create_policy(OWNER.clone(),222,10,10,vec![1,2,2]));
+		assert_noop!(NuLinkProxy::create_policy(OWNER.clone(),333,10,vec![1,2,3]),Error::<Test>::InvalidStaker);
+		assert_noop!(NuLinkProxy::create_policy(OWNER.clone(),444,10,vec![1,4]),Error::<Test>::InvalidStaker);
+	});
+}
 #[test]
 fn it_works_for_calc_staker_hash() {
 	new_test_ext().execute_with(|| {
