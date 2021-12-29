@@ -12,6 +12,9 @@ use sp_runtime::{traits::{
 use frame_support::{ensure,dispatch::DispatchResult,inherent::Vec, pallet_prelude::*};
 use codec::MaxEncodedLen;
 use nulink_utils::{BasePolicy,GetPolicyInfo,PolicyID,PolicyInfo};
+use nulink_utils::PolicyInfo2;
+
+
 #[macro_use]
 extern crate alloc;
 
@@ -53,6 +56,12 @@ pub mod pallet {
 	pub(super) type Policies<T: Config> = StorageMap<_, Blake2_128Concat, PolicyID,
 		PolicyInfo<T::AccountId,T::BlockNumber>,
 		ValueQuery>;
+
+	// #[pallet::storage]
+	// #[pallet::getter(fn policys2)]
+	// pub(super) type Policys2<T: Config> = StorageMap<_, Blake2_128Concat, PolicyID,
+	// 	PolicyInfo2<T::AccountId, T::BlockNumber>,
+	// 	ValueQuery>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://substrate.dev/docs/en/knowledgebase/runtime/events
@@ -135,6 +144,11 @@ impl<T: Config> Pallet<T>  {
 				uni_stakers.push(s.clone());
 			}
 		}
+		// Policys2::<T>::insert(pid,PolicyInfo2{
+		// 	p_id: pid.clone(),
+		// 	policy_start: frame_system::Pallet::<T>::block_number(),
+		// 	policy_owner: owner.clone(),
+		// });
 		// reserve the asset
 		Policies::<T>::insert(pid, PolicyInfo{
 			p_id:	pid.clone(),

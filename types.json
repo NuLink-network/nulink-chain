@@ -11,8 +11,17 @@
         "policy_start": "BlockNumber",
         "period": "BlockNumber",
         "policy_stop": "BlockNumber",
+        "policy_owner": "AccountId",
         "stackers": "Vec<AccountId>"
     },
+    "PolicyInfo2": {
+        "p_id": "PolicyID",
+        "policy_start": "BlockNumber",
+        "period": "BlockNumber",
+        "policy_stop": "BlockNumber",
+        "stackers": "Vec<AccountId>"
+    },
+
     "StakeInfo": {
         "coinbase": "AccountId",
         "workbase": "Vec<u8>",
