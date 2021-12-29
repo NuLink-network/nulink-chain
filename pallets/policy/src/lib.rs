@@ -144,11 +144,6 @@ impl<T: Config> Pallet<T>  {
 				uni_stakers.push(s.clone());
 			}
 		}
-		// Policys2::<T>::insert(pid,PolicyInfo2{
-		// 	p_id: pid.clone(),
-		// 	policy_start: frame_system::Pallet::<T>::block_number(),
-		// 	policy_owner: owner.clone(),
-		// });
 		// reserve the asset
 		Policies::<T>::insert(pid, PolicyInfo{
 			p_id:	pid.clone(),

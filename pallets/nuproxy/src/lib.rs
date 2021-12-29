@@ -12,6 +12,8 @@ mod tests;
 mod benchmarking;
 mod types;
 
+#[macro_use]
+extern crate alloc;
 
 pub use pallet::*;
 use sp_runtime::{traits::{
@@ -130,6 +132,7 @@ pub mod pallet {
 		/// only one watcher
 		OnlyOneWatcher,
 		InvalidStaker,
+		RepeatStakerCoinBase,
 	}
 
 	#[pallet::hooks]
@@ -274,10 +277,25 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		v.len() > 0
 	}
+	pub fn has_staker_by_coinbase(account: T::AccountId) -> bool {
+		let v: Vec<T::AccountId> = Stakers::<T>::iter()
+			.filter(|(_,val)| val.coinbase == account)
+			.map(|(_,val)| val.coinbase.clone())
+			.collect();
+		v.len() > 0
+	}
 	/// First,make all old stakers stopping `iswork=false`.
 	/// If the staker which in `old` still in next epoch will be added again.
 	/// add the new stakers in to the nulink.
 	pub fn update_stakers(new_stakers: Vec<StakeInfo<T::AccountId,BalanceOf<T>>>) -> DispatchResult {
+		let staker_count = new_stakers.len();
+		let mut uni_stakers: Vec<T::AccountId> = vec![];
+		for s in new_stakers.clone() {
+			if !uni_stakers.contains(&s.coinbase) {
+				uni_stakers.push(s.coinbase.clone());
+			}
+		}
+		ensure!(staker_count == uni_stakers.len(),Error::<T>::RepeatStakerCoinBase);
 
 		let keys = Stakers::<T>::iter()
 			.map(|(x, _)| x)
@@ -287,9 +305,11 @@ impl<T: Config> Pallet<T>  {
 			Stakers::<T>::mutate(key.clone(),|value|{
 			value.iswork = false;
 		})}
+
 		for new_staker in new_stakers {
 			let new_key = Self::calc_staker_hash(new_staker.clone());
-			if Stakers::<T>::contains_key(new_key.clone()) {
+			//if Stakers::<T>::contains_key(new_key.clone()) {
+			if Self::has_staker_by_coinbase(new_staker.coinbase.clone()) {
 				Stakers::<T>::mutate(new_key.clone(),|value|{
 					value.iswork = true;
 				});
