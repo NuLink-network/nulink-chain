@@ -99,17 +99,17 @@ fn it_works_for_stakers1() {
 fn it_works_for_stakers2() {
 	new_test_ext().execute_with(|| {
 		// keep the stakers
-		let staker1 = make_stake_infos2(1,true);
-		// let staker2 = make_stake_infos2(2,true);
-		// let staker3 = make_stake_infos2(3,false);
-		let staker4 = make_stake_infos2(1,true);
-		let stakers0 = vec![staker1.clone(),staker4.clone()];
+		let mut staker1 = make_stake_infos2(1,true);
+		let mut staker2 = make_stake_infos2(1,true);
+		let mut staker3 = make_stake_infos2(1,false);
+		let stakers0 = vec![staker1.clone(),staker2.clone()];
 		assert_noop!(NuLinkProxy::update_stakers(stakers0),Error::<Test>::RepeatStakerCoinBase);
-
-		// assert_eq!(NuLinkProxy::valid_staker(1),true);
-		// assert_eq!(NuLinkProxy::valid_staker(2),true);
-		// assert_eq!(NuLinkProxy::valid_staker(3),false);
-		// assert_eq!(NuLinkProxy::valid_staker(4),false);
+		// set the staker1.iswork was false, it will not works.
+		let mut staker1_1 = staker1.clone();
+		staker1_1.iswork = false;
+		let stakers1 = vec![staker1.clone(),staker1_1.clone()];
+		assert_noop!(NuLinkProxy::update_stakers(stakers1),Error::<Test>::RepeatStakerCoinBase);
+		// assert_ok!(NuLinkProxy::update_stakers(stakers1));
 	});
 }
 
