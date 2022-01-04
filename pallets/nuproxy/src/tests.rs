@@ -101,7 +101,8 @@ fn it_works_for_stakers2() {
 		// keep the stakers
 		let mut staker1 = make_stake_infos2(1,true);
 		let mut staker2 = make_stake_infos2(1,true);
-		let mut staker3 = make_stake_infos2(1,false);
+		let mut staker3 = make_stake_infos2(2,true);
+		let mut staker4 = make_stake_infos2(1,false);
 		let stakers0 = vec![staker1.clone(),staker2.clone()];
 		assert_noop!(NuLinkProxy::update_stakers(stakers0),Error::<Test>::RepeatStakerCoinBase);
 		// set the staker1.iswork was false, it will not works.
@@ -109,7 +110,11 @@ fn it_works_for_stakers2() {
 		staker1_1.iswork = false;
 		let stakers1 = vec![staker1.clone(),staker1_1.clone()];
 		assert_noop!(NuLinkProxy::update_stakers(stakers1),Error::<Test>::RepeatStakerCoinBase);
-		// assert_ok!(NuLinkProxy::update_stakers(stakers1));
+		// make iswork=false for the staker which account=1
+		let stakers2 = vec![staker1.clone(),staker3.clone()];
+		assert_ok!(NuLinkProxy::update_stakers(stakers2));
+		let stakers3 = vec![staker4.clone()];
+		assert_ok!(NuLinkProxy::update_stakers(stakers3));
 	});
 }
 
