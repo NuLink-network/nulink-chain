@@ -40,7 +40,11 @@ pub fn authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) {
 
 pub fn development_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
-
+	// generated with secret: subkey inspect "$secret"/fir
+	let watcher_key: AccountId = hex![
+		// 5EZQrJ2XBSNnzQ78jEBiRZj5S4SMEczZJMc8ANL54AWdtz9n
+		"6e5d55b59a932dc6a64c36441fa57506a52aa38ea214ff76e60e9b09a3d6de79"
+	].into();
 	Ok(ChainSpec::from_genesis(
 		// Name
 		"Development",
@@ -61,6 +65,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 				get_account_id_from_seed::<sr25519::Public>("Bob"),
 				get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
 				get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+				watcher_key,
 			],
 			true,
 		),
@@ -79,6 +84,10 @@ pub fn development_config() -> Result<ChainSpec, String> {
 
 pub fn local_testnet_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
+	let watcher_key: AccountId = hex![
+		// 5EZQrJ2XBSNnzQ78jEBiRZj5S4SMEczZJMc8ANL54AWdtz9n
+		"6e5d55b59a932dc6a64c36441fa57506a52aa38ea214ff76e60e9b09a3d6de79"
+	].into();
 
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -109,6 +118,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 				// get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
 				// get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 				// get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+				watcher_key,
 			],
 			true,
 		),
