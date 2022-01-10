@@ -7,6 +7,7 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{Verify, IdentifyAccount};
 use sc_service::ChainType;
+use hex_literal::hex;
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -65,7 +66,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 				get_account_id_from_seed::<sr25519::Public>("Bob"),
 				get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
 				get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-				watcher_key,
+				watcher_key.clone(),
 			],
 			true,
 		),
@@ -118,7 +119,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 				// get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
 				// get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 				// get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-				watcher_key,
+				watcher_key.clone(),
 			],
 			true,
 		),
