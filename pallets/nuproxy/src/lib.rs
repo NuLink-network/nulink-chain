@@ -133,6 +133,7 @@ pub mod pallet {
 		OnlyOneWatcher,
 		InvalidStaker,
 		RepeatStakerCoinBase,
+		NoStakerKey,
 	}
 
 	#[pallet::hooks]
@@ -266,6 +267,7 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		for k in unused { Watchers::<T>::remove(&k); }
 	}
+
 	/// get amount of the reward by stake's coinbase.
 	pub fn get_staker_reward_by_coinbase(account: T::AccountId) -> BalanceOf<T> {
 		Rewards::<T>::get(account)
@@ -303,16 +305,20 @@ impl<T: Config> Pallet<T>  {
 
 		for key in keys {
 			Stakers::<T>::mutate(key.clone(),|value|{
-			value.iswork = false;
+				value.iswork = false;
+				value.workcount += 1;
 		})}
 
 		for new_staker in new_stakers {
 			let new_key = Self::calc_staker_hash(new_staker.clone());
 			//if Stakers::<T>::contains_key(new_key.clone()) {
 			if Self::has_staker_by_coinbase(new_staker.coinbase.clone()) {
-				Stakers::<T>::mutate(new_key.clone(),|value|{
-					value.iswork = true;
-				});
+				match Self::get_key_by_coinbase(new_staker.coinbase.clone()) {
+					Ok(key) => Stakers::<T>::mutate(key.clone(),|value|{
+						value.iswork = true;
+					}),
+					Err(e) => continue,
+				}
 			} else {
 				Stakers::<T>::insert(new_key.clone(),new_staker);
 			}
@@ -374,6 +380,13 @@ impl<T: Config> Pallet<T>  {
 			.map(|(x,_)| x )
 			.collect();
 		keys
+	}
+	pub fn get_key_by_coinbase(coinbase: T::AccountId) -> Result<T::Hash,DispatchError> {
+		let hashs = Self::coinbase_to_staker_key(vec![coinbase]);
+		if hashs.len() > 0 {
+			return Ok(hashs[0].clone());
+		}
+		Err(Error::<T>::NoStakerKey.into())
 	}
 	/// get the policy info from policyID by use the other pallet storage
 	pub fn get_policy_by_pallet(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
