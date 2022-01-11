@@ -267,7 +267,7 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		for k in unused { Watchers::<T>::remove(&k); }
 	}
-
+	
 	/// get amount of the reward by stake's coinbase.
 	pub fn get_staker_reward_by_coinbase(account: T::AccountId) -> BalanceOf<T> {
 		Rewards::<T>::get(account)
@@ -316,6 +316,9 @@ impl<T: Config> Pallet<T>  {
 				match Self::get_key_by_coinbase(new_staker.coinbase.clone()) {
 					Ok(key) => Stakers::<T>::mutate(key.clone(),|value|{
 						value.iswork = true;
+						value.workcount = 0;
+						value.locked_balance = new_staker.locked_balance;
+						value.workbase = new_staker.workbase.clone();
 					}),
 					Err(e) => continue,
 				}
