@@ -171,7 +171,9 @@ pub mod pallet {
 				Self::mint_by_staker(all_reward)?;
 			}
 			Self::reward_in_epoch(frame_system::Pallet::<T>::block_number())?;
-			Self::update_stakers(infos)
+			Self::update_stakers(infos)?;
+			Self::remove_unused_staker();
+			Ok(())
 		}
 		/// claim the reward by the staker account after the every epoch.
 		///
@@ -267,7 +269,13 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		for k in unused { Watchers::<T>::remove(&k); }
 	}
-	
+	pub fn remove_unused_staker() {
+		let unused_keys: Vec<_> = Stakers::<T>::iter()
+			.filter(|(_,val)| !val.iswork && val.workcount > 1)
+			.map(|(k, _)| k.clone())
+			.collect();
+		for k in unused_keys { Stakers::<T>::remove(&k); }
+	}
 	/// get amount of the reward by stake's coinbase.
 	pub fn get_staker_reward_by_coinbase(account: T::AccountId) -> BalanceOf<T> {
 		Rewards::<T>::get(account)
