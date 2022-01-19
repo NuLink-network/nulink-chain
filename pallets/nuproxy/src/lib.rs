@@ -434,6 +434,30 @@ impl<T: Config> Pallet<T>  {
 					if last_assign == Zero::zero() {
 						last_assign = info.policy_start;
 					}
+					if last_assign < info.policy_stop && reserve > Zero::zero() {
+						let mut stop = num;
+						if num > info.policy_stop {
+							stop = info.policy_stop;
+						}
+						ensure!(stop >= last_assign, Error::<T>::LowBlockNumber);
+						let useblock: u32 = (stop - last_assign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;
+						if useblock > 0 {
+							let mut all = reserve * <BalanceOf<T>>::from(useblock) / <BalanceOf<T>>::from(range);
+							if all > reserve {
+								all = reserve;
+							}
+
+							Self::assigned_by_policy_reward(info.stackers.clone(),all)?;
+
+							PolicyReserve::<T>::mutate(pid,|x|->DispatchResult {
+								let new_amount = x.1.saturating_sub(all);
+								x.1 = new_amount;
+								x.2 = num;
+								Ok(())
+							});
+						}
+						last_assign = num;
+					}
 					if last_assign >= info.policy_stop || reserve == Zero::zero() {
 						// the user stop the policy or Deplete all assets
 						if reserve > Zero::zero() {
@@ -449,29 +473,7 @@ impl<T: Config> Pallet<T>  {
 						}
 						return Ok(())
 					}
-					let mut stop = num;
-					if num > info.policy_stop {
-						stop = info.policy_stop;
-					}
-					ensure!(stop >= last_assign, Error::<T>::LowBlockNumber);
-					let useblock: u32 = (stop - last_assign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;
-
-					if useblock == 0 {
-						return Ok(())
-					}
-					let mut all = reserve * <BalanceOf<T>>::from(useblock) / <BalanceOf<T>>::from(range);
-					if all > reserve {
-						all = reserve;
-					}
-
-					Self::assigned_by_policy_reward(info.stackers.clone(),all)?;
-
-					PolicyReserve::<T>::mutate(pid,|x|->DispatchResult {
-						let new_amount = x.1.saturating_sub(all);
-						x.1 = new_amount;
-						x.2 = num;
-						Ok(())
-					})
+					Ok(())
 				} else {
 					Err(Error::<T>::NoReserve)?
 				}
