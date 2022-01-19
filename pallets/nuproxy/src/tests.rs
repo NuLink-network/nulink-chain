@@ -99,10 +99,10 @@ fn it_works_for_stakers1() {
 fn it_works_for_stakers2() {
 	new_test_ext().execute_with(|| {
 		// keep the stakers
-		let mut staker1 = make_stake_infos2(1,true);
-		let mut staker2 = make_stake_infos2(1,true);
-		let mut staker3 = make_stake_infos2(2,true);
-		let mut staker4 = make_stake_infos2(1,false);
+		let staker1 = make_stake_infos2(1,true);
+		let staker2 = make_stake_infos2(1,true);
+		let staker3 = make_stake_infos2(2,true);
+		let staker4 = make_stake_infos2(1,false);
 		let stakers0 = vec![staker1.clone(),staker2.clone()];
 		assert_noop!(NuLinkProxy::update_stakers(stakers0),Error::<Test>::RepeatStakerCoinBase);
 		// set the staker1.iswork was false, it will not works.
