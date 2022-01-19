@@ -191,8 +191,9 @@ pub mod pallet {
 		/// Origin must be Signed,the user account who revoked the policy.
 		/// `amount`: the amount asset(NLK) to be claimed.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn claim_reward_by_user(origin: OriginFor<T>,amount: BalanceOf<T>) -> DispatchResult {
+		pub fn claim_reward_by_user(origin: OriginFor<T>) -> DispatchResult {
 			let account = ensure_signed(origin)?;
+			let amount = Rewards::<T>::get(account.clone());
 			Self::base_reward(account,amount)
 		}
 		/// it wiil reserve asset(NLK) to vault for reward stakers by every epoch.
