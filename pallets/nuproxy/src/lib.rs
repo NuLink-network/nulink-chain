@@ -171,8 +171,11 @@ pub mod pallet {
 				Self::mint_by_staker(all_reward)?;
 			}
 			Self::reward_in_epoch(frame_system::Pallet::<T>::block_number())?;
-			Self::update_stakers(infos)?;
-			Self::remove_unused_staker();
+			if infos.len() > 0 {
+				Self::update_stakers(infos)?;
+				Self::remove_unused_staker();
+			}
+
 			Ok(())
 		}
 		/// claim the reward by the staker account after the every epoch.
@@ -492,7 +495,9 @@ impl<T: Config> Pallet<T>  {
 		});
 		Ok(())
 	}
-
+	pub fn claim_reward(account: T::AccountId,balance: BalanceOf<T>)-> DispatchResult {
+		Self::base_reward(account,balance)
+	}
 }
 
 impl<T: Config> BasePolicy<T::AccountId,BalanceOf<T>,PolicyID> for Pallet<T> {
