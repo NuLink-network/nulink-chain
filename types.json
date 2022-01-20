@@ -13,14 +13,14 @@
         "policy_stop": "BlockNumber",
         "policy_owner": "AccountId",
         "policy_balance": "Balance",
-        "stackers": "Vec<AccountId>"
+        "stakers": "Vec<AccountId>"
     },
     "PolicyInfo2": {
         "p_id": "PolicyID",
         "policy_start": "BlockNumber",
         "period": "BlockNumber",
         "policy_stop": "BlockNumber",
-        "stackers": "Vec<AccountId>"
+        "stakers": "Vec<AccountId>"
     },
 
     "StakeInfo": {
