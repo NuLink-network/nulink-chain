@@ -12,6 +12,7 @@
         "period": "BlockNumber",
         "policy_stop": "BlockNumber",
         "policy_owner": "AccountId",
+        "policy_balance": "Balance",
         "stackers": "Vec<AccountId>"
     },
     "PolicyInfo2": {

@@ -54,7 +54,7 @@ pub mod pallet {
 	#[pallet::getter(fn policys)]
 	/// Metadata of an staker.
 	pub(super) type Policies<T: Config> = StorageMap<_, Blake2_128Concat, PolicyID,
-		PolicyInfo<T::AccountId,T::BlockNumber>,
+		PolicyInfo<T::AccountId,T::BlockNumber,T::Balance>,
 		ValueQuery>;
 
 	// #[pallet::storage]
@@ -151,6 +151,7 @@ impl<T: Config> Pallet<T>  {
 			policy_start:  frame_system::Pallet::<T>::block_number() + One::one(),
 			policy_stop:  period + frame_system::Pallet::<T>::block_number() + One::one(),
 			policy_owner: owner.clone(),
+			policy_balance: amount.clone(),
 			stackers: uni_stakers.clone(),
 		});
 		T::PolicyHandle::create_policy(owner.clone(),amount,pid.clone(),uni_stakers.clone())?;
@@ -171,17 +172,17 @@ impl<T: Config> Pallet<T>  {
 			Ok(())
 		})
 	}
-	pub fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
+	pub fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber,T::Balance>, DispatchError> {
 		ensure!(Policies::<T>::contains_key(pid), Error::<T>::NotFoundPolicyID);
 		let info = Policies::<T>::get(pid);
 		Ok(info.clone())
 	}
 }
 
-impl<T: Config> GetPolicyInfo<T::AccountId,PolicyID,T::BlockNumber> for Pallet<T> {
+impl<T: Config> GetPolicyInfo<T::AccountId,PolicyID,T::BlockNumber,T::Balance> for Pallet<T> {
 	/// get the policy info by policy id,it called from nuproxy pallet to calc the reward
 	/// in the epoch.
-	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
+	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber,T::Balance>, DispatchError> {
 		Self::get_policy_info_by_pid(pid)
 	}
 }

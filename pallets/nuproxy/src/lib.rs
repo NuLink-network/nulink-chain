@@ -48,7 +48,7 @@ pub mod pallet {
 		/// The currency trait.
 		type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
 		/// the policy infos handle for pallet policy
-		type GetPolicyInfo: GetPolicyInfo<Self::AccountId,PolicyID,Self::BlockNumber>;
+		type GetPolicyInfo: GetPolicyInfo<Self::AccountId,PolicyID,Self::BlockNumber,Self::Balance>;
 		/// The balance unit for the staker's reward.
 		#[pallet::constant]
 		type RewardUnit: Get<BalanceOf<Self>>;
@@ -416,7 +416,7 @@ impl<T: Config> Pallet<T>  {
 		Err(Error::<T>::NoStakerKey.into())
 	}
 	/// get the policy info from policyID by use the other pallet storage
-	pub fn get_policy_by_pallet(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber>, DispatchError> {
+	pub fn get_policy_by_pallet(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber,T::Balance>, DispatchError> {
 		T::GetPolicyInfo::get_policy_info_by_pid(pid)
 	}
 	/// All staker members share the policy rewards.

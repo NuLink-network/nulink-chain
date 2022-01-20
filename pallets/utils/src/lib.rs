@@ -11,12 +11,13 @@ use frame_support::{dispatch::DispatchResult,inherent::Vec, pallet_prelude::*};
 pub type PolicyID = u128;
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default)]
-pub struct PolicyInfo<AccountId,BlockNumber> {
+pub struct PolicyInfo<AccountId,BlockNumber,Balance> {
 	pub p_id: PolicyID,
 	pub policy_start: BlockNumber,
 	pub period: BlockNumber,
 	pub policy_stop: BlockNumber,
 	pub policy_owner:  AccountId,
+	pub policy_balance: Balance,
 	pub stackers:  Vec<AccountId>,
 }
 
@@ -31,8 +32,8 @@ pub struct PolicyInfo2<AccountId,BlockNumber> {
 }
 
 
-pub trait GetPolicyInfo<AccountId,PolicyID,BlockNumber> {
-	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber>, DispatchError>;
+pub trait GetPolicyInfo<AccountId,PolicyID,BlockNumber,Balance> {
+	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber,Balance>, DispatchError>;
 }
 
 pub trait BasePolicy<AccountId,Balance,PolicyID> {

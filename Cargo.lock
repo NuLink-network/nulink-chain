@@ -3691,6 +3691,7 @@ version = "3.0.0"
 dependencies = [
  "frame-benchmarking",
  "frame-benchmarking-cli",
+ "hex-literal",
  "jsonrpc-core",
  "nulink-core-runtime",
  "pallet-transaction-payment-rpc",
