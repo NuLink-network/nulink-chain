@@ -88,6 +88,9 @@ pub mod pallet {
 	/// reserved rewards of the stakers or policy creator,staker or the creator need claim it.
 	pub(super) type Rewards<T: Config> =  StorageMap<_, Blake2_128Concat, T::AccountId, BalanceOf<T>, ValueQuery>;
 
+	#[pallet::storage]
+	#[pallet::getter(fn donate)]
+	pub type donate<T> = StorageValue<_, BalanceOf<T>>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://substrate.dev/docs/en/knowledgebase/runtime/events
@@ -168,7 +171,12 @@ pub mod pallet {
 
 			let all_reward = Self::calc_reward_by_epoch();
 			if Self::vault_balance() >= all_reward {
-				Self::mint_by_staker(all_reward)?;
+				let mut new_balance: BalanceOf<T> = donate::<T>::get().unwrap();
+				if new_balance >= all_reward {
+					Self::mint_by_staker(all_reward)?;
+					new_balance -= all_reward;
+					donate::<T>::put(new_balance);
+				}
 			}
 			Self::reward_in_epoch(frame_system::Pallet::<T>::block_number())?;
 			if infos.len() > 0 {
@@ -210,6 +218,10 @@ pub mod pallet {
 
 			let valut: T::AccountId = Self::account_id();
 			T::Currency::transfer(&who,&valut,amount,AllowDeath)?;
+
+			let mut new_balance: BalanceOf<T> = donate::<T>::get().unwrap();
+			new_balance += amount;
+			donate::<T>::put(new_balance);
 
 			// Emit an event.
 			Self::deposit_event(Event::ReserveBalance(who, amount));
