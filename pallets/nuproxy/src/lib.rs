@@ -442,7 +442,7 @@ impl<T: Config> Pallet<T>  {
 			Ok(info) => {
 				ensure!(num >= info.policy_start, Error::<T>::LowBlockNumber);
 				ensure!(info.period > Zero::zero(), Error::<T>::InValidPeriod);
-				let range: u32 = info.period.try_into().map_err(|_| Error::<T>::ConvertFailed)?;
+				// let range: u32 = info.period.try_into().map_err(|_| Error::<T>::ConvertFailed)?;
 
 				if let (user,reserve,last) = PolicyReserve::<T>::get(pid) {
 					let mut last_assign = last;
@@ -456,6 +456,8 @@ impl<T: Config> Pallet<T>  {
 						}
 						ensure!(stop >= last_assign, Error::<T>::LowBlockNumber);
 						let useblock: u32 = (stop - last_assign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;
+						let range: u32 = (info.policy_stop - last_assign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;
+
 						if useblock > 0 {
 							let mut all = reserve * <BalanceOf<T>>::from(useblock) / <BalanceOf<T>>::from(range);
 							if all > reserve {

@@ -270,6 +270,48 @@ fn it_works_for_assigned_by_policy_reward() {
 }
 
 #[test]
+fn it_works_for_policy() {
+	new_test_ext().execute_with(|| {
+		let staker1 = make_stake_infos(1,100,1);
+		assert_ok!(NuLinkProxy::update_stakers(vec![staker1.clone()]));
+
+		frame_system::Pallet::<Test>::set_block_number(0);
+		// create the policy by owner
+		let value = 500;
+		let policyid = 1111;
+		let stakers0 = vec![1];
+		// check the owner asset
+		assert_eq!(Balances::free_balance(OWNER),1000);
+		create_policy(OWNER.clone(),value,100,policyid,stakers0.clone());
+		assert_eq!(PolicyReserve::<Test>::contains_key(policyid),true);
+		assert_eq!(Balances::free_balance(OWNER),1000-value);
+		assert_eq!(NuLinkProxy::vault_balance(),value);
+		// set the epoch 1
+		let epoch1 = 40;
+		frame_system::Pallet::<Test>::set_block_number(epoch1);
+
+		// check the staker balance
+		assert_eq!(Balances::free_balance(1),0);
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(1),0);
+
+		// reward in epoch 1 and check it
+		assert_ok!(NuLinkProxy::reward_in_epoch(epoch1));
+		let alluse1 = value * (epoch1-1) / 100;
+		// check the reward of the staker
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(1),alluse1);
+
+		// set the epoch 2
+		let epoch2 = 80;
+		frame_system::Pallet::<Test>::set_block_number(epoch2);
+		// reward in epoch 2 and check it
+		assert_ok!(NuLinkProxy::reward_in_epoch(epoch1));
+		let alluse1 = value * (epoch2-epoch1) / (100-epoch1);
+		// check the reward of the staker
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(1),alluse1);
+	});
+}
+
+#[test]
 fn it_works_for_reward_by_user_policy() {
 	new_test_ext().execute_with(|| {
 		let staker1 = make_stake_infos(1,100,1);
