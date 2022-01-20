@@ -171,7 +171,7 @@ pub mod pallet {
 
 			let all_reward = Self::calc_reward_by_epoch();
 			if Self::vault_balance() >= all_reward {
-				let mut new_balance: BalanceOf<T> = donate::<T>::get().unwrap();
+				let mut new_balance: BalanceOf<T> = Self::get_donate_balance();
 				if new_balance >= all_reward {
 					Self::mint_by_staker(all_reward)?;
 					new_balance -= all_reward;
@@ -219,7 +219,7 @@ pub mod pallet {
 			let valut: T::AccountId = Self::account_id();
 			T::Currency::transfer(&who,&valut,amount,AllowDeath)?;
 
-			let mut new_balance: BalanceOf<T> = donate::<T>::get().unwrap();
+			let mut new_balance: BalanceOf<T> = Self::get_donate_balance();
 			new_balance += amount;
 			donate::<T>::put(new_balance);
 
@@ -259,6 +259,13 @@ impl<T: Config> Pallet<T>  {
 		s.iswork = false;
 		s.locked_balance = Zero::zero();
 		T::Hashing::hash_of(&s)
+	}
+	pub fn get_donate_balance() -> BalanceOf<T> {
+		match donate::<T>::get() {
+			// Return an error if the value has not been set.
+			None => Zero::zero(),
+			Some(old) => old.clone(),
+		}
 	}
 	/// calc all reward for stakers by every epoch trigger by watcher.
 	pub fn calc_reward_by_epoch() -> BalanceOf<T> {
