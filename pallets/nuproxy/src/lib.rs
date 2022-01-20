@@ -81,7 +81,7 @@ pub mod pallet {
 	/// Balance: the asset of the policy which use to assigned to stakers
 	/// BlockNumber: the block number when the reward was last distributed
 	pub(super) type PolicyReserve<T: Config> =  StorageMap<_, Blake2_128Concat, u128,
-		(T::AccountId,BalanceOf<T>,T::BlockNumber), ValueQuery>;
+		(T::AccountId,BalanceOf<T>,T::BlockNumber,BalanceOf<T>), ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn rewards)]
@@ -449,13 +449,16 @@ impl<T: Config> Pallet<T>  {
 			Ok(info) => {
 				ensure!(num >= info.policy_start, Error::<T>::LowBlockNumber);
 				ensure!(info.period > Zero::zero(), Error::<T>::InValidPeriod);
-				// let range: u32 = info.period.try_into().map_err(|_| Error::<T>::ConvertFailed)?;
+				let range: u32 = info.period.try_into().map_err(|_| Error::<T>::ConvertFailed)?;
+				// let all_pay: u32 = info.policy_balance.try_into().map_err(|_| Error::<T>::ConvertFailed)?;
+				// let all_pay :u64 = info.policy_balance.saturated_into();
 
-				if let (user,reserve,last) = PolicyReserve::<T>::get(pid) {
+				if let (user,reserve,last,all_pay) = PolicyReserve::<T>::get(pid) {
 					let mut last_assign = last;
 					if last_assign == Zero::zero() {
 						last_assign = info.policy_start;
 					}
+					let mut current_reserve = reserve;
 					if last_assign < info.policy_stop && reserve > Zero::zero() {
 						let mut stop = num;
 						if num > info.policy_stop {
@@ -463,11 +466,10 @@ impl<T: Config> Pallet<T>  {
 						}
 						ensure!(stop >= last_assign, Error::<T>::LowBlockNumber);
 						let useblock: u32 = (stop - last_assign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;
-						let range: u32 = (info.policy_stop - last_assign).try_into().map_err(|_| Error::<T>::ConvertFailed)?;
 
 						if useblock > 0 {
-							let mut all = reserve * <BalanceOf<T>>::from(useblock) / <BalanceOf<T>>::from(range);
-							if all > reserve {
+							let mut all = all_pay * <BalanceOf<T>>::from(useblock) / <BalanceOf<T>>::from(range);
+							if all > reserve || num >= info.policy_start + info.period{
 								all = reserve;
 							}
 
@@ -475,6 +477,7 @@ impl<T: Config> Pallet<T>  {
 
 							PolicyReserve::<T>::mutate(pid,|x|->DispatchResult {
 								let new_amount = x.1.saturating_sub(all);
+								current_reserve = new_amount.clone();
 								x.1 = new_amount;
 								x.2 = num;
 								Ok(())
@@ -484,9 +487,9 @@ impl<T: Config> Pallet<T>  {
 					}
 					if last_assign >= info.policy_stop || reserve == Zero::zero() {
 						// the user stop the policy or Deplete all assets
-						if reserve > Zero::zero() {
+						if reserve > Zero::zero() && current_reserve > Zero::zero() {
 							Rewards::<T>::mutate(user.clone(), |val| -> DispatchResult {
-								let new_amount = val.saturating_add(reserve);
+								let new_amount = val.saturating_add(current_reserve);
 								*val = new_amount;
 								Ok(())
 							}).unwrap();
@@ -534,7 +537,7 @@ impl<T: Config> BasePolicy<T::AccountId,BalanceOf<T>,PolicyID> for Pallet<T> {
 		}
 
 		PolicyReserve::<T>::mutate(pid, |val| -> DispatchResult {
-			*val = (who.clone(),amount,Zero::zero());
+			*val = (who.clone(),amount,Zero::zero(),amount.clone());
 			let valut: T::AccountId = Self::account_id();
 			let from = who.clone();
 			T::Currency::transfer(&from,&valut,amount,AllowDeath)

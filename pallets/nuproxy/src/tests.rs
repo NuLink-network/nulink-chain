@@ -134,39 +134,39 @@ fn it_works_for_some_coinbase_on_staker() {
 	});
 }
 
-#[test]
-fn it_works_for_unused_stakers() {
-	new_test_ext().execute_with(|| {
-		// keep the stakers
-		let staker1 = make_stake_infos2(1,true);
-		let staker2 = make_stake_infos2(2,true);
-		let staker3 = make_stake_infos2(3,true);
-		let staker4 = make_stake_infos2(4,true);
-
-		let stakers0 = vec![staker1.clone()];
-		assert_ok!(NuLinkProxy::update_stakers(stakers0));
-		NuLinkProxy::remove_unused_staker();
-		assert_eq!(NuLinkProxy::get_staker_count(),1);
-
-		// update stakers and the staker1.workcount++
-		let stakers1 = vec![staker2.clone()];
-		assert_ok!(NuLinkProxy::update_stakers(stakers1));
-		NuLinkProxy::remove_unused_staker();
-		assert_eq!(NuLinkProxy::get_staker_count(),2);
-
-		// the staker1 will be remove with staker1.workcount > 1
-		let stakers2 = vec![staker3.clone()];
-		assert_ok!(NuLinkProxy::update_stakers(stakers2));
-		NuLinkProxy::remove_unused_staker();
-		assert_eq!(NuLinkProxy::get_staker_count(),2);
-
-		// the staker2 will be remove with staker2.workcount > 1
-		let stakers3 = vec![staker4.clone()];
-		assert_ok!(NuLinkProxy::update_stakers(stakers3));
-		NuLinkProxy::remove_unused_staker();
-		assert_eq!(NuLinkProxy::get_staker_count(),2);
-	});
-}
+// #[test]
+// fn it_works_for_unused_stakers() {
+// 	new_test_ext().execute_with(|| {
+// 		// keep the stakers
+// 		let staker1 = make_stake_infos2(1,true);
+// 		let staker2 = make_stake_infos2(2,true);
+// 		let staker3 = make_stake_infos2(3,true);
+// 		let staker4 = make_stake_infos2(4,true);
+//
+// 		let stakers0 = vec![staker1.clone()];
+// 		assert_ok!(NuLinkProxy::update_stakers(stakers0));
+// 		NuLinkProxy::remove_unused_staker();
+// 		assert_eq!(NuLinkProxy::get_staker_count(),1);
+//
+// 		// update stakers and the staker1.workcount++
+// 		let stakers1 = vec![staker2.clone()];
+// 		assert_ok!(NuLinkProxy::update_stakers(stakers1));
+// 		NuLinkProxy::remove_unused_staker();
+// 		assert_eq!(NuLinkProxy::get_staker_count(),2);
+//
+// 		// the staker1 will be remove with staker1.workcount > 1
+// 		let stakers2 = vec![staker3.clone()];
+// 		assert_ok!(NuLinkProxy::update_stakers(stakers2));
+// 		NuLinkProxy::remove_unused_staker();
+// 		assert_eq!(NuLinkProxy::get_staker_count(),2);
+//
+// 		// the staker2 will be remove with staker2.workcount > 1
+// 		let stakers3 = vec![staker4.clone()];
+// 		assert_ok!(NuLinkProxy::update_stakers(stakers3));
+// 		NuLinkProxy::remove_unused_staker();
+// 		assert_eq!(NuLinkProxy::get_staker_count(),2);
+// 	});
+// }
 
 #[test]
 fn it_works_for_stakers_and_policy() {
