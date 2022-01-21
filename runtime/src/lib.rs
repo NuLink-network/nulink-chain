@@ -279,7 +279,7 @@ impl pallet_policy::Config for Runtime {
 
 parameter_types! {
 	pub const NulinkPalletId: PalletId = PalletId(*b"py/proxy");
-	pub const InitRewardUnit: Balance = 100;
+	pub const InitRewardUnit: Balance = 1000000000000;
 }
 
 impl pallet_nuproxy::Config for Runtime {
