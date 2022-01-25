@@ -5,7 +5,7 @@ edition = '2018'
 license = 'Apache-2.0'
 name = 'nulink-utils'
 readme = 'README.md'
-repository = 'https://github.com/NuLink-network/nulink-core'
+repository = 'https://github.com/NuLink-network/nulink-chain'
 version = '3.0.0'
 
 [package.metadata.docs.rs]

@@ -2,8 +2,8 @@
 authors = ['nulink dev<https://github.com/NuLink-network>']
 edition = '2018'
 license = 'Apache-2.0'
-name = 'nulink-core-runtime'
-repository = 'https://github.com/NuLink-network/nulink-core'
+name = 'nulink-chain-runtime'
+repository = 'https://github.com/NuLink-network/nulink-chain'
 version = '3.0.0'
 
 [package.metadata.docs.rs]

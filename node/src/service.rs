@@ -3,7 +3,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 use sc_client_api::{ExecutorProvider, RemoteBackend};
-use nulink_core_runtime::{self, opaque::Block, RuntimeApi};
+use nulink_chain_runtime::{self, opaque::Block, RuntimeApi};
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sp_inherents::InherentDataProviders;
 use sc_executor::native_executor_instance;
@@ -17,8 +17,8 @@ use sc_telemetry::{Telemetry, TelemetryWorker};
 // Our native executor instance.
 native_executor_instance!(
 	pub Executor,
-	nulink_core_runtime::api::dispatch,
-	nulink_core_runtime::native_version,
+	nulink_chain_runtime::api::dispatch,
+	nulink_chain_runtime::native_version,
 	frame_benchmarking::benchmarking::HostFunctions,
 );
 

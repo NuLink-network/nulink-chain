@@ -96,8 +96,8 @@ pub mod opaque {
 // To learn more about runtime versioning and what each of the following value means:
 //   https://substrate.dev/docs/en/knowledgebase/runtime/upgrades#runtime-versioning
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("nulink-core"),
-	impl_name: create_runtime_str!("nulink-core"),
+	spec_name: create_runtime_str!("nulink-chain"),
+	impl_name: create_runtime_str!("nulink-chain"),
 	authoring_version: 1,
 	// The version of the runtime specification. A full node will not attempt to use its native
 	//   runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,

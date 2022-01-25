@@ -4,12 +4,12 @@ build = 'build.rs'
 description = 'A fresh FRAME-based Nulink node, ready for hacking.'
 edition = '2018'
 license = 'Apache-2.0'
-name = 'nulink-core'
-repository = 'https://github.com/NuLink-network/nulink-core'
+name = 'nulink-chain'
+repository = 'https://github.com/NuLink-network/nulink-chain'
 version = '3.0.0'
 
 [[bin]]
-name = 'nulink-core'
+name = 'nulink-chain'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
@@ -52,8 +52,8 @@ sp-transaction-pool = {version = '3.0.0', git = 'https://github.com/paritytech/s
 substrate-frame-rpc-system = {version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 
 # local dependencies
-nulink-core-runtime = {version = '3.0.0', path = '../runtime'}
+nulink-chain-runtime = {version = '3.0.0', path = '../runtime'}
 
 [features]
 default = []
-runtime-benchmarks = ['nulink-core-runtime/runtime-benchmarks']
+runtime-benchmarks = ['nulink-chain-runtime/runtime-benchmarks']

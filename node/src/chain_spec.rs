@@ -1,5 +1,5 @@
 use sp_core::{Pair, Public, sr25519};
-use nulink_core_runtime::{
+use nulink_chain_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig,
 	SudoConfig, SystemConfig, WASM_BINARY, Signature
 };

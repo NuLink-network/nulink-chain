@@ -2,16 +2,16 @@ version: "3.2"
 
 services:
   dev:
-    container_name: nulink-core
+    container_name: nulink-chain
     image: paritytech/ci-linux:974ba3ac-20201006
-    working_dir: /var/www/nulink-core
+    working_dir: /var/www/nulink-chain
     ports:
       - "9944:9944"
     environment:
-      - CARGO_HOME=/var/www/nulink-core/.cargo
+      - CARGO_HOME=/var/www/nulink-chain/.cargo
     volumes:
-      - .:/var/www/nulink-core
+      - .:/var/www/nulink-chain
       - type: bind
         source: ./.local
         target: /root/.local
-    command: bash -c "cargo build --release && ./target/release/nulink-core --dev --ws-external"
+    command: bash -c "cargo build --release && ./target/release/nulink-chain --dev --ws-external"

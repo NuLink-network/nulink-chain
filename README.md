@@ -1,6 +1,6 @@
 # Nulink
 
-[![Try on playground](https://img.shields.io/badge/Playground-nulink_core-brightgreen?logo=Parity%20Substrate)](https://playground.substrate.dev/?deploy=nulink-core)
+[![Try on playground](https://img.shields.io/badge/Playground-nulink_chain-brightgreen?logo=Parity%20Substrate)](https://playground.substrate.dev/?deploy=nulink-chain)
 
 The project NuLink is trying to bridge the NuCypher Network to Polkadot Ecosystem. The NuCypher Network is a decentralized network of nodes that perform threshold cryptography operations serving users with secrets management and dynamic access control.
 
@@ -51,7 +51,7 @@ Once the project has been built, the following command can be used to explore al
 subcommands:
 
 ```sh
-./target/release/nulink-core -h
+./target/release/nulink-chain -h
 ```
 
 ## Run
@@ -65,19 +65,19 @@ node.
 This command will start the single-node development chain with persistent state:
 
 ```bash
-./target/release/nulink-core --dev
+./target/release/nulink-chain --dev
 ```
 
 Purge the development chain's state:
 
 ```bash
-./target/release/nulink-core purge-chain --dev
+./target/release/nulink-chain purge-chain --dev
 ```
 
 Start the development chain with detailed logging:
 
 ```bash
-RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/nulink-core -lruntime=debug --dev
+RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/nulink-chain -lruntime=debug --dev
 ```
 
 ### Connect with Polkadot-JS Apps Front-end
@@ -92,7 +92,7 @@ If you want to see the multi-node consensus algorithm in action, refer to
 
 
 ## Usage
-A simple way to use NULINK-NETWORK to distribute rewards to all stakers used local asset(NLK),you can run local node for use it with `./target/release/nulink-core --dev --tmp --ws-external`, and use the [Polkadot JS UI](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer), you may need the [types](https://github.com/NuLink-network/nulink-core/blob/main/types.json) with the UI.then we can register the watcher and make it work.
+A simple way to use NULINK-NETWORK to distribute rewards to all stakers used local asset(NLK),you can run local node for use it with `./target/release/nulink-chain --dev --tmp --ws-external`, and use the [Polkadot JS UI](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer), you may need the [types](https://github.com/NuLink-network/nulink-chain/blob/main/types.json) with the UI.then we can register the watcher and make it work.
 
 ```
 1. register watcher

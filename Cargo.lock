@@ -3686,14 +3686,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "nulink-core"
+name = "nulink-chain"
 version = "3.0.0"
 dependencies = [
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "hex-literal",
  "jsonrpc-core",
- "nulink-core-runtime",
+ "nulink-chain-runtime",
  "pallet-transaction-payment-rpc",
  "sc-basic-authorship",
  "sc-cli",
@@ -3724,7 +3724,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "nulink-core-runtime"
+name = "nulink-chain-runtime"
 version = "3.0.0"
 dependencies = [
  "frame-benchmarking",
