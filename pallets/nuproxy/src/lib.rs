@@ -27,7 +27,7 @@ use frame_support::{
 	traits::{Get,ReservableCurrency, ExistenceRequirement::AllowDeath, Currency},
 	dispatch::DispatchResult, pallet_prelude::*, PalletId
 };
-
+// use rand::{self, Rng};
 use codec::MaxEncodedLen;
 use crate::types::BalanceOf;
 use nulink_utils::{PolicyID,PolicyInfo,GetPolicyInfo,BasePolicy};
@@ -284,6 +284,18 @@ impl<T: Config> Pallet<T>  {
 	}
 	pub fn exist_watcher(watcher: T::AccountId) -> bool {
 		Watchers::<T>::get(watcher.clone()).is_one()
+	}
+	pub fn get_active_staker() -> Result<Vec<T::AccountId>,DispatchError> {
+		let tmp: Vec<T::AccountId> = Stakers::<T>::iter()
+			.filter(|(_,val)| val.iswork)
+			.map(|(_,val)| val.coinbase.clone())
+			.collect();
+		let sum = tmp.len() as u64;
+		let bn = frame_system::Pallet::<T>::block_number();
+		let seed: u32 = bn.try_into().map_err(|_| Error::<T>::ConvertFailed)?;
+		let pos = (seed as u64 % sum) as usize;
+		// let pos = (rand::random::<u64>() % sum) as usize;
+		Ok(vec![tmp[pos].clone()])
 	}
 	pub fn remove_unused_watcher() {
 		let unused: Vec<_> = Watchers::<T>::iter()

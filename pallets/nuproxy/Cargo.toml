@@ -22,13 +22,14 @@ frame-system = {default-features = false, version = '3.0.0', git = 'https://gith
 sp-runtime = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 sp-std = {default-features = false,version = "3.0.0", git = 'https://github.com/paritytech/substrate.git',tag = 'monthly-2021-05' }
 pallet-balances = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
-
+rand = { version = "0.7.2", optional = true }
 # local dependencies
 nulink-utils = {default-features = false,version = '3.0.0', path = '../utils' }
 pallet-policy = {default-features = false,version = '3.0.0', path = '../policy' }
 
 [dev-dependencies]
 serde = '1.0.119'
+rand = "0.7.2"
 sp-core = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 sp-io = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 sp-runtime = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
@@ -44,6 +45,7 @@ std = [
 	'frame-support/std',
 	'frame-system/std',
 	'pallet-balances/std',
+	"rand",
 	'frame-benchmarking/std',
 ]
 try-runtime = ['frame-support/try-runtime']
