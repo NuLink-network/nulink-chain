@@ -2,24 +2,24 @@
 
 [![Try on playground](https://img.shields.io/badge/Playground-nulink_chain-brightgreen?logo=Parity%20Substrate)](https://playground.substrate.dev/?deploy=nulink-chain)
 
-The project NuLink is trying to bridge the NuCypher Network to Polkadot Ecosystem. The NuCypher Network is a decentralized network of nodes that perform threshold cryptography operations serving users with secrets management and dynamic access control.
+The project NuLink is trying to bridge the NuCypher Network to Polkadot Ecosystem. The NuCypher Network is a decentralized network of nodes that perform threshold cryptography operations which are serving users with secrets management and dynamic access control.
 
-NuLink network used a fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacking :rocket:
+NuLink network is using a fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacking :rocket:
 
 ## Getting Started
 
 ### Rust Setup
 
-Setup instructions for working with the [Rust](https://www.rust-lang.org/) programming language can
+Instructions for setting up working environment of the [Rust](https://www.rust-lang.org/) programming language can
 be found at the
 [Substrate Developer Hub](https://substrate.dev/docs/en/knowledgebase/getting-started). Follow those
-steps to install [`rustup`](https://rustup.rs/) and configure the Rust toolchain to default to the
+steps to install [`rustup`](https://rustup.rs/) and configure the Rust toolchain to default with the
 latest stable version.
 
 ### Makefile
 
-This project uses a [Makefile](Makefile) to document helpful commands and make it easier to execute
-them. Get started by running these [`make`](https://www.gnu.org/software/make/manual/make.html)
+This project uses a [Makefile](Makefile) to document helpful commands and make them easier to be executed. 
+Get started by running these [`make`](https://www.gnu.org/software/make/manual/make.html)
 targets:
 
 1. `make init` - Run the [init script](scripts/init.sh) to configure the Rust toolchain for
@@ -28,7 +28,7 @@ targets:
 
 The init script and Makefile both specify the version of the
 [Rust nightly compiler](https://substrate.dev/docs/en/knowledgebase/getting-started/#rust-nightly-toolchain)
-that this project depends on.
+which this project is depending on.
 
 ### Build
 
@@ -38,7 +38,7 @@ without launching it:
 ```sh
 cargo build --release
 ```
-or you and `cargo build` or `cargo build --release` to build it. and you can run `cargo test` to run the tests.
+or you can do `cargo build` or `cargo build --release` to build it. and you can run `cargo test` to run the tests.
 ```
  cargo build 
  or 
@@ -92,7 +92,8 @@ If you want to see the multi-node consensus algorithm in action, refer to
 
 
 ## Usage
-A simple way to use NULINK-NETWORK to distribute rewards to all stakers used local asset(NLK),you can run local node for use it with `./target/release/nulink-chain --dev --tmp --ws-external`, and use the [Polkadot JS UI](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer), you may need the [types](https://github.com/NuLink-network/nulink-chain/blob/main/types.json) with the UI.then we can register the watcher and make it work.
+A simple way to use NULINK-NETWORK to distribute rewards to all stakers used local asset(NLK),you can run local node for using it with `./target/release/nulink-chain --dev --tmp --ws-external`. 
+For using the [Polkadot JS UI](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer), you may need the [types](https://github.com/NuLink-network/nulink-chain/blob/main/types.json) with the UI. After that we can register the watcher and make it work.
 
 ```
 1. register watcher
@@ -104,45 +105,49 @@ A simple way to use NULINK-NETWORK to distribute rewards to all stakers used loc
 ```
 
 ### Register Watcher
-Before using the Pallet, you need to register the watcher first. After the registration is successful, the watcher can submit the registered staker information and update the staker information regularly.
-ps: Only supports one watcher for the time being.
-we can register watcher with the inherent user `alice` and submit an extrinsicz with `nuproxy.register_watcher` function.
+Before using the Pallet, you need to register the watcher first. After the registration is successfully done, the watcher can submit the registered staker information and update the staker information regularly.
+ps: Only one watcher is supported currently in this version.
+we can register watcher with the inherent user `alice` and submit an extrinsic with `nuproxy.register_watcher` function.
 
-1. `origin`: the owner of the watcher,on this,it's `alice`.
+1. `origin`: the owner of the watcher, in this case it's `alice`.
 
 ### Deploy The Staker By Watcher
-After the watcher registration is completed, the watcehr node submits the staker information to the nulink network in every epoch.
-The watcher collect the staker infos from ethereum network and update it to the nulink network,the epoch is based on the epoch in the contract in the ethereum network.
+After the watcher registration is completed, the watcehr node submits the staker information to the nulink network in each epoch.
+The watcher collects the staker infos from ethereum network and updates it to the nulink network. The epoch is based on the epoch in the contract in the ethereum network.
 
-There is a simple way to update staker infos into nulink network,submit an extrinsicz with `nuproxy.update_staker_infos_and_mint` function. update the staker infos and calc reward by epoch with the called by watchers,update the staker infos from ethereum network and reward it in every epoch if it still works on next epoch in the ethereum, If it stops working, the watcher will periodically notify the nulink network and stop rewarding it.
+There is a simpler way to update staker info into nulink network: 
+Submit an extrinsic with `nuproxy.update_staker_infos_and_mint` function. 
+Update the staker infos and calculate reward by epoch with the called by watchers,
+Update the staker infos from ethereum network and reward it in every epoch if the staker is still working in the next epoch in ethereum. 
+If the staker stops working, the watcher will periodically notify the nulink network and stop rewarding it.
 
 1. `origin`: the watcher account(`alice`) registered by `nuproxy.register_watcher` interface.
 2. `infos`: the new stakers in next epoch from ethereum by watcher set.
 
 ### Deposit Local Asset For Reward
-Before deploy the staker infos, it must be deposit assets(Local asset[`NLK`]) to the vault for assigned rewards, submit an extrinsicz with `nuproxy.reserve_to_vault` function.
+Before deploying the staker infos, the staker must deposit assets(Local asset[`NLK`]) to the vault for assigning rewards, submit an extrinsic with `nuproxy.reserve_to_vault` function.
 
 1. `origin`: the account(`alice`) who reserve the asset to vault.
 2. `amount`: the amount of the local asset(NLK).
 
 ### Claim Reward By Staker
-Now stakers users can receive rewards after each epoch,we can submit an extrinsicz with `nuproxy.claim_reward_by_staker` to claim it's rewards.
+Now staking users(stakers) can receive rewards after each epoch by submiting an extrinsic with `nuproxy.claim_reward_by_staker` to claim it's rewards.
 
 1. `origin`: the staker user account.
 2. `amount`: the amount of the local asset(NLK).
 
 ### Create Policy By User
-We can use `policy.create_policy` to create policy by user and set the key params to nulink network.
+Use `policy.create_policy` to create policy by user and set the key params to nulink network.
 
-1. `origin`: the user account(`alice`) can create policy.
-2. `pid`: the ID of the policy,produced by the user on outside.
-3. `amount`: the amount of the local asset(NlK),used to reward for the staker.
-4. `period`: Indicates the time range for the staker to process the policy,calculated by the number of blocknumbers.
-5. `stakers`: the worker of the nulink network,it works for the crypto newwork.
+1. `origin`: the user account(`alice`) who can create policy.
+2. `pid`: the ID of the policy which is produced by the user on outside.
+3. `amount`: the amount of the local asset(NlK) which is for rewarding the staker.
+4. `period`: Indicates the time range for the staker to process the policy. it's calculated by the number of blocknumbers.
+5. `stakers`: the worker of the nulink network,it works for the crypto network.
 
 ### Revoke Policy By User
-We can use `policy.revoke_policy` to revoke the policy by user before they create it. If the reward for this policy is left, it will all be returned to the creator。
-Finally, the user who use the revoke policy can check their remaining balance(NLK) with `Balance::free_balance`.
+Use `policy.revoke_policy` to revoke the policy by user before they create it. If the rewards for this policy is gone, all of them will be returned to the creator。
+Finally, the user who uses the revoke policy can check their remaining balance(NLK) with `Balance::free_balance`.
 
-1. `origin`: the user account(`alice`) who had create the policy.
-2. `pid`: the ID of the policy,produced by the user on outside.
+1. `origin`: the user account(`alice`) who has created the policy.
+2. `pid`: the ID of the policy which is produced by the user outside.
