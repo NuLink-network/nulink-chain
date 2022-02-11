@@ -4,6 +4,12 @@
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
 
+
+//! # Nuproxy Pallet
+//!
+//! A nuproxy pallet which can retrieve the information of stakers and bonding workers
+//! from NuCypher contracts in Ethereum to Polkadot parachain;
+
 #[cfg(test)]
 mod mock;
 #[cfg(test)]

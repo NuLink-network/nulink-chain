@@ -4,6 +4,14 @@
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
 
+
+//! # Policy Pallet
+//!
+//! A policy pallet management pallet which holds policy fees and distributes
+//! them to nodes of the network.
+
+
+
 pub use pallet::*;
 
 use sp_runtime::{traits::{
