@@ -7,8 +7,8 @@
 
 //! # Nuproxy Pallet
 //!
-//! A nuproxy pallet which can retrieve the information of stakers and bonding workers
-//! from NuCypher contracts in Ethereum to Polkadot parachain;
+//! The nuproxy pallet is mostly used for retrieving the information of stakers and 
+//! bonding workers from NuCypher contracts in Ethereum to the Polkadot parachain;
 
 #[cfg(test)]
 mod mock;
@@ -67,7 +67,7 @@ pub mod pallet {
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(_);
 
-	// the wather can only start working after registration
+	// the watcher can start working after registration
 	#[pallet::storage]
 	#[pallet::getter(fn watchers)]
 	pub(super) type Watchers<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, u32, ValueQuery>;
@@ -84,14 +84,14 @@ pub mod pallet {
 	/// reserve asset for policy assigned to the stakers
 	/// key: policy id
 	/// Accountid: the owner of the policy's creator
-	/// Balance: the asset of the policy which use to assigned to stakers
+	/// Balance: the asset of the policy which is used for rewarding stakers
 	/// BlockNumber: the block number when the reward was last distributed
 	pub(super) type PolicyReserve<T: Config> =  StorageMap<_, Blake2_128Concat, u128,
 		(T::AccountId,BalanceOf<T>,T::BlockNumber,BalanceOf<T>), ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn rewards)]
-	/// reserved rewards of the stakers or policy creator,staker or the creator need claim it.
+	/// reserved rewards for the stakers or remaining balance for policy creator.
 	pub(super) type Rewards<T: Config> =  StorageMap<_, Blake2_128Concat, T::AccountId, BalanceOf<T>, ValueQuery>;
 
 	#[pallet::storage]
@@ -99,7 +99,7 @@ pub mod pallet {
 	pub type donate<T> = StorageValue<_, BalanceOf<T>>;
 
 	// Pallets use events to inform users when important changes are made.
-	// https://substrate.dev/docs/en/knowledgebase/runtime/events
+	// check details at: https://substrate.dev/docs/en/knowledgebase/runtime/events
 	#[pallet::event]
 	#[pallet::metadata(T::AccountId = "AccountId")]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -119,7 +119,7 @@ pub mod pallet {
 		/// Errors should have helpful documentation associated with them.
 		StorageOverflow,
 		AlreadyExist,
-		/// Account hasn't reward in the epoch
+		/// Account do not exist in this epoch
 		AccountNotExist,
 		/// Account balance must be greater than or equal to the transfer amount
 		BalanceLow,
@@ -132,13 +132,13 @@ pub mod pallet {
 		/// not found the reserve for the policy id
 		NoReserve,
 		RepeatReserve,
-		/// watcher not exist
+		/// watcher do not exist
 		NoWatcher,
 		/// the period of the policy was invalid
 		InValidPeriod,
 		/// convert failed from blocknumber to i32
 		ConvertFailed,
-		/// only one watcher
+		/// only one watcher register in this pallet
 		OnlyOneWatcher,
 		InvalidStaker,
 		RepeatStakerCoinBase,
@@ -148,7 +148,7 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
-	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
+	// Dispatchable functions allow users to interact with the pallet and invoke state changes.
 	// These functions materialize as "extrinsics", which are often compared to transactions.
 	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
 	#[pallet::call]
@@ -164,12 +164,13 @@ pub mod pallet {
 			<Watchers<T>>::insert(who.clone(),1);
 			Ok(())
 		}
-		/// Update the staker infos and calculate rewards each epoch, will called by watchers.
-		/// Update the staker infos from ethereum network and incentive stakers every epoch if
-		/// the staker still works in the ethereum. If staker stops working, the watcher will periodically
+		/// Update the staker infos and calculate rewards for each epoch, can only be called by watchers.
+		/// Update the staker infos from Ethereum network and incentive stakers for each epoch if
+		/// the staker is still alive. If the staker stops working, the watcher will periodically
 		/// notify the nulink network and stop rewarding it.
 		///
-		/// `infos`: the new stakers in next epoch from ethereum by watcher set.
+		/// `infos`: the information of new stakers in next epoch from ethereum 
+                       ///  which was updated by the watchers.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn update_staker_infos_and_mint(origin: OriginFor<T>,infos: Vec<StakeInfo<T::AccountId,BalanceOf<T>>>) -> DispatchResult {
 			let watcher = ensure_signed(origin)?;
@@ -192,31 +193,30 @@ pub mod pallet {
 
 			Ok(())
 		}
-		/// claim the reward by the staker account after the every epoch.
+		/// Claim the reward by the staker account after each epoch.
 		///
 		/// Origin must be Signed.
-		/// `amount`: the amount asset(NLK) to be claimed.
+		/// `amount`: the amount of assets(NLK) to be claimed.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn claim_reward_by_staker(origin: OriginFor<T>,amount: BalanceOf<T>) -> DispatchResult {
 			let staker = ensure_signed(origin)?;
 			Self::base_reward(staker,amount)
 		}
 		
-		/// The user who revokes the policy can claim the remaining assets(NLK) 
-		/// from the creation of the policy store.
+		/// Claim the remaining assets(NLK) by the user who revokes the policy.
 		///
-		/// Origin must be Signed,the user account who revoked the policy.
-		/// `amount`: the amount asset(NLK) to be claimed.
+		/// Origin must be Signed by the user account who revoked the policy.
+		/// `amount`: the amount of assets(NLK) to be claimed.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn claim_reward_by_user(origin: OriginFor<T>) -> DispatchResult {
 			let account = ensure_signed(origin)?;
 			let amount = Rewards::<T>::get(account.clone());
 			Self::base_reward(account,amount)
 		}
-		/// it wiil reserve asset(NLK) to vault for reward stakers by every epoch.
+		///  Reserve assets(NLK) to vault for reward stakers by every epoch.
 		///
 		///  Origin must be Signed.
-		/// `amount`: the amount asset(NLK) to be reserve.
+		/// `amount`: the amount of asset(NLK) to be reserved.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn reserve_to_vault(origin: OriginFor<T>,amount: BalanceOf<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
@@ -244,20 +244,20 @@ impl<T: Config> Pallet<T>  {
 	pub fn account_id() -> T::AccountId {
 		T::PalletId::get().into_account()
 	}
-	/// the balance(local balance(NLK)) of the vault.
+	/// The balance(local balance(NLK)) of the vault.
 	///
-	/// the vault's balance can reserved by any user use local balance.
+	/// The vault's balance can be reserved by any user using the local balance.
 	pub fn vault_balance() -> BalanceOf<T> {
 		let vault = Self::account_id();
 		T::Currency::free_balance(&vault)
 	}
-	/// get all stakers in the pallet.
+	/// Get all stakers in the pallet.
 	///
-	/// include all stakers include those that are no longer working.
+	/// Include all current and historic skaters.
 	pub fn get_staker_count() -> u64 {
 		return Stakers::<T>::iter().count() as u64;
 	}
-	/// calc staker hash with coinbase,workbase,workcount field.
+	/// Calculate staker hash with coinbase,workbase,workcount field.
 	///
 	/// iswork = false and locked_balance = 0. it is w
 	pub fn calc_staker_hash(staker: StakeInfo<T::AccountId,BalanceOf<T>>) -> T::Hash {
@@ -273,13 +273,14 @@ impl<T: Config> Pallet<T>  {
 			Some(old) => old.clone(),
 		}
 	}
-	/// calc all reward for stakers by every epoch trigger by watcher.
+	/// Calculate all rewards for stakers after each epoch. 
+            /// This will be triggered by the watcher.
 	pub fn calc_reward_by_epoch() -> BalanceOf<T> {
 		let unit = T::RewardUnit::get();
 		unit
 		// One::one()
 	}
-	/// get all balance by all staker's staking
+	/// Get all balance by all staker's staking
 	pub fn get_total_staking() -> BalanceOf<T> {
 		Stakers::<T>::iter()
 			.filter(|(_,val)| val.iswork)
@@ -317,7 +318,7 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		for k in unused_keys { Stakers::<T>::remove(&k); }
 	}
-	/// get amount of the reward by stake's coinbase.
+	/// Get the amount of the reward by the stake's coinbase.
 	pub fn get_staker_reward_by_coinbase(account: T::AccountId) -> BalanceOf<T> {
 		Rewards::<T>::get(account)
 	}
@@ -335,9 +336,9 @@ impl<T: Config> Pallet<T>  {
 			.collect();
 		v.len() > 0
 	}
-	/// First,make all old stakers stopping `iswork=false`.
-	/// If the staker which in `old` still in next epoch will be added again.
-	/// add the new stakers in to the nulink.
+	/// Remove all the old stakers if `iswork=false` from the staker pool.
+	/// If the `old` staker is still alive in the next epoch, it will be added back to the pool.
+	/// Add the `new` stakers into the staker pool.
 	pub fn update_stakers(new_stakers: Vec<StakeInfo<T::AccountId,BalanceOf<T>>>) -> DispatchResult {
 		let staker_count = new_stakers.len();
 		let mut uni_stakers: Vec<T::AccountId> = vec![];
@@ -377,9 +378,9 @@ impl<T: Config> Pallet<T>  {
 		}
 		Ok(())
 	}
-	/// In each epoch, the nulink start to allocate a fixed reward to all stakers, and rewards will
+	/// In each epoch, the nulink starts to allocate a fixed reward to all stakers, and rewards will
 	/// be distributed proportionally according to the stakers' stake.
-	/// the stakers can claim their rewards in any time.
+	/// The stakers can claim their rewards at any time.
 	pub fn mint_by_staker(all_reward: BalanceOf<T>) -> DispatchResult {
 		let total = Self::get_total_staking();
 		let cur_all_reward: Vec<_> = Stakers::<T>::iter()
@@ -423,7 +424,7 @@ impl<T: Config> Pallet<T>  {
 			T::Currency::transfer(&valut,&account,amount,AllowDeath)
 		})
 	}
-	/// get staker key for staker's coinbase field
+	/// Get staker key for staker's coinbase field
 	pub fn coinbase_to_staker_key(accounts: Vec<T::AccountId>) -> Vec<T::Hash> {
 		let keys: Vec<_> = Stakers::<T>::iter()
 			.filter(|(_,val)| {
@@ -440,7 +441,7 @@ impl<T: Config> Pallet<T>  {
 		}
 		Err(Error::<T>::NoStakerKey.into())
 	}
-	/// get the policy info from policyID by use the other pallet storage
+	/// Get the policy info from policyID by use the other pallet storage
 	pub fn get_policy_by_pallet(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber,T::Balance>, DispatchError> {
 		T::GetPolicyInfo::get_policy_info_by_pid(pid)
 	}
@@ -457,9 +458,9 @@ impl<T: Config> Pallet<T>  {
 		}
 		Ok(())
 	}
-	/// calc every policy reward by epoch.
+	/// Calculate policy rewards for each epoch.
 	///
-	/// when `useblock == 0`,it means the user was revoke the policy and stop it.
+	/// `useblock == 0` means the user has revoked the policy.
 	pub fn calc_reward_in_policy(num: T::BlockNumber,pid: PolicyID) -> DispatchResult {
 		ensure!(PolicyReserve::<T>::contains_key(pid), Error::<T>::NoReserve);
 
@@ -504,7 +505,7 @@ impl<T: Config> Pallet<T>  {
 						last_assign = num;
 					}
 					if last_assign >= info.policy_stop || reserve == Zero::zero() {
-						// the user stop the policy or Deplete all assets
+						// the user can stop the policy or Deplete all assets
 						if reserve > Zero::zero() && current_reserve > Zero::zero() {
 							Rewards::<T>::mutate(user.clone(), |val| -> DispatchResult {
 								let new_amount = val.saturating_add(current_reserve);
@@ -543,7 +544,7 @@ impl<T: Config> Pallet<T>  {
 }
 
 impl<T: Config> BasePolicy<T::AccountId,BalanceOf<T>,PolicyID> for Pallet<T> {
-	/// policy owner will reserve asset(local asset) to the vault when create policy.
+	/// policy owner will reserve the asset(local asset) to the vault when creating the policy.
 	fn create_policy(who: T::AccountId,amount: BalanceOf<T>,pid: PolicyID,stakers: Vec<T::AccountId>) -> DispatchResult {
 		ensure!(!PolicyReserve::<T>::contains_key(pid), Error::<T>::RepeatReserve);
 		// stakers.iter().for_each(|s| ensure!(!Self::valid_staker(s),Error::<T>::InvalidStaker));
@@ -562,3 +563,5 @@ impl<T: Config> BasePolicy<T::AccountId,BalanceOf<T>,PolicyID> for Pallet<T> {
 		})
 	}
 }
+
+
