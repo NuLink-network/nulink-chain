@@ -170,7 +170,7 @@ pub mod pallet {
 		/// notify the nulink network and stop rewarding it.
 		///
 		/// `infos`: the information of new stakers in next epoch from ethereum 
-                       ///  which was updated by the watchers.
+        ///  which was updated by the watchers.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn update_staker_infos_and_mint(origin: OriginFor<T>,infos: Vec<StakeInfo<T::AccountId,BalanceOf<T>>>) -> DispatchResult {
 			let watcher = ensure_signed(origin)?;
@@ -274,7 +274,7 @@ impl<T: Config> Pallet<T>  {
 		}
 	}
 	/// Calculate all rewards for stakers after each epoch. 
-            /// This will be triggered by the watcher.
+    /// This will be triggered by the watcher.
 	pub fn calc_reward_by_epoch() -> BalanceOf<T> {
 		let unit = T::RewardUnit::get();
 		unit
