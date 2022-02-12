@@ -7,8 +7,8 @@
 
 //! # Policy Pallet
 //!
-//! A policy pallet management pallet which holds policy fees and distributes
-//! them to nodes of the network.
+//! The policy management pallet will manage the policy fees and distribute
+//! them to the stakers accordingly.
 
 
 
@@ -60,7 +60,7 @@ pub mod pallet {
 	// The pallet's runtime storage items.
 	#[pallet::storage]
 	#[pallet::getter(fn policys)]
-	/// Metadata of an staker.
+	/// Metadata of a staker.
 	pub(super) type Policies<T: Config> = StorageMap<_, Blake2_128Concat, PolicyID,
 		PolicyInfo<T::AccountId,T::BlockNumber,T::Balance>,
 		ValueQuery>;
@@ -105,7 +105,7 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
-	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
+	// Dispatchable functions allow users to interact with the pallet and invoke state changes.
 	// These functions materialize as "extrinsics", which are often compared to transactions.
 	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
 	#[pallet::call]
@@ -113,23 +113,23 @@ pub mod pallet {
 		/// create policy by user and set the key params to nulink network.
 		///
 		/// Origin must be Signed.
-		/// `pid`: the ID of the policy,produced by the user on outside.
+		/// `pid`: the ID of the policy,produced by the user offline.
 		/// `amount`: the amount of the local asset(NlK),used to reward for the
 		/// stakers.
 		/// `period`: Indicates the time range for the staker to process the policy,
-		/// calculated by the number of blocknumbers.
-		/// `stakers`: the worker of the nulink network,it works for the crypto newwork.
+		/// calculated by the number of block numbers.
+		/// `stakers`: the worker of the nulink network,it works for the crypto network.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn create_policy(origin: OriginFor<T>,pid: PolicyID,amount: T::Balance,
 		period: T::BlockNumber,stakers: Vec<T::AccountId>) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::base_create_policy(owner,pid,amount,period,stakers)
 		}
-		/// revoke the policy by user before they create it. If the reward for this policy
-		/// is left, it will all be returned to the creator.
+		/// Revoke the policy by the user before they create it. If there is remaining reward
+		/// for this policy, it will be returned to the policy creator.
 		///
 		/// Origin must be Signed.
-		/// `pid`: the ID of the policy,produced by the user on outside.
+		/// `pid`: the ID of the policy, produced by the user offline.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn revoke_policy(origin: OriginFor<T>,pid: PolicyID) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
@@ -152,7 +152,7 @@ impl<T: Config> Pallet<T>  {
 				uni_stakers.push(s.clone());
 			}
 		}
-		// reserve the asset
+		// Reserve the asset
 		Policies::<T>::insert(pid, PolicyInfo{
 			p_id:	pid.clone(),
 			period: period,
@@ -188,9 +188,11 @@ impl<T: Config> Pallet<T>  {
 }
 
 impl<T: Config> GetPolicyInfo<T::AccountId,PolicyID,T::BlockNumber,T::Balance> for Pallet<T> {
-	/// get the policy info by policy id,it called from nuproxy pallet to calc the reward
-	/// in the epoch.
+	/// Get the policy info by the policy id, it may be called by the nuproxy pallet to calculate
+	///  the reward for the epoch.
 	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber,T::Balance>, DispatchError> {
 		Self::get_policy_info_by_pid(pid)
 	}
 }
+
+
