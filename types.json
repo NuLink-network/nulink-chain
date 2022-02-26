@@ -15,13 +15,6 @@
         "policy_balance": "Balance",
         "stakers": "Vec<AccountId>"
     },
-    "PolicyInfo2": {
-        "p_id": "PolicyID",
-        "policy_start": "BlockNumber",
-        "period": "BlockNumber",
-        "policy_stop": "BlockNumber",
-        "stakers": "Vec<AccountId>"
-    },
 
     "StakeInfo": {
         "coinbase": "AccountId",

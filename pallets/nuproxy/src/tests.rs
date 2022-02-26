@@ -6,15 +6,6 @@ use std::str::FromStr;
 use sp_runtime::testing::H256;
 use sp_std::convert::TryFrom;
 
-#[test]
-fn it_works_for_default_value() {
-	new_test_ext().execute_with(|| {
-		// Dispatch a signed extrinsic.
-		// assert_ok!(NuLinkProxy::do_something(Origin::signed(1), 42));
-		// Read pallet storage and assert an expected result.
-		// assert_eq!(NuLinkProxy::something(), Some(42));
-	});
-}
 
 #[test]
 fn it_work_for_init_staker() {
@@ -29,17 +20,6 @@ fn it_work_for_init_staker() {
 #[test]
 fn it_works_for_set_watcher() {
 	new_test_ext().execute_with(|| {
-		// assert_ok!(NuLinkProxy::register_watcher(Origin::signed(1)));
-		// assert_ok!(NuLinkProxy::register_watcher(Origin::signed(2)));
-		// assert_ok!(NuLinkProxy::register_watcher(Origin::signed(3)));
-		// assert_ok!(NuLinkProxy::register_watcher(Origin::signed(4)));
-		// assert_noop!(NuLinkProxy::register_watcher(Origin::signed(2)),Error::<Test>::AlreadyExist);
-		// assert_noop!(NuLinkProxy::register_watcher(Origin::signed(4)),Error::<Test>::AlreadyExist);
-		//
-		// assert_eq!(NuLinkProxy::exist_watcher(1),true);
-		// assert_eq!(NuLinkProxy::exist_watcher(3),true);
-		// assert_eq!(NuLinkProxy::exist_watcher(5),false);
-		// assert_eq!(NuLinkProxy::exist_watcher(6),false);
 		// only one watcher
 		assert_ok!(NuLinkProxy::register_watcher(Origin::signed(1)));
 		assert_noop!(NuLinkProxy::register_watcher(Origin::signed(1)),Error::<Test>::AlreadyExist);
@@ -133,40 +113,6 @@ fn it_works_for_some_coinbase_on_staker() {
 		assert_eq!(NuLinkProxy::get_staker_count(),1);
 	});
 }
-
-// #[test]
-// fn it_works_for_unused_stakers() {
-// 	new_test_ext().execute_with(|| {
-// 		// keep the stakers
-// 		let staker1 = make_stake_infos2(1,true);
-// 		let staker2 = make_stake_infos2(2,true);
-// 		let staker3 = make_stake_infos2(3,true);
-// 		let staker4 = make_stake_infos2(4,true);
-//
-// 		let stakers0 = vec![staker1.clone()];
-// 		assert_ok!(NuLinkProxy::update_stakers(stakers0));
-// 		NuLinkProxy::remove_unused_staker();
-// 		assert_eq!(NuLinkProxy::get_staker_count(),1);
-//
-// 		// update stakers and the staker1.workcount++
-// 		let stakers1 = vec![staker2.clone()];
-// 		assert_ok!(NuLinkProxy::update_stakers(stakers1));
-// 		NuLinkProxy::remove_unused_staker();
-// 		assert_eq!(NuLinkProxy::get_staker_count(),2);
-//
-// 		// the staker1 will be remove with staker1.workcount > 1
-// 		let stakers2 = vec![staker3.clone()];
-// 		assert_ok!(NuLinkProxy::update_stakers(stakers2));
-// 		NuLinkProxy::remove_unused_staker();
-// 		assert_eq!(NuLinkProxy::get_staker_count(),2);
-//
-// 		// the staker2 will be remove with staker2.workcount > 1
-// 		let stakers3 = vec![staker4.clone()];
-// 		assert_ok!(NuLinkProxy::update_stakers(stakers3));
-// 		NuLinkProxy::remove_unused_staker();
-// 		assert_eq!(NuLinkProxy::get_staker_count(),2);
-// 	});
-// }
 
 #[test]
 fn it_works_for_stakers_and_policy() {
@@ -275,14 +221,19 @@ fn it_works_for_policy() {
 		let staker1 = make_stake_infos(1,100,1);
 		assert_ok!(NuLinkProxy::update_stakers(vec![staker1.clone()]));
 
-		frame_system::Pallet::<Test>::set_block_number(0);
 		// create the policy by owner
 		let value = 500;
 		let policyid = 1111;
 		let stakers0 = vec![1];
+		let period = 100;
+		let block_number = 0;
+		let policy_start = block_number + 1;
+		let policy_end = policy_start + period;
+
 		// check the owner asset
+		frame_system::Pallet::<Test>::set_block_number(block_number);
 		assert_eq!(Balances::free_balance(OWNER),1000);
-		create_policy(OWNER.clone(),value,100,policyid,stakers0.clone());
+		create_policy(OWNER.clone(),value,period,policyid,stakers0.clone());
 		assert_eq!(PolicyReserve::<Test>::contains_key(policyid),true);
 		assert_eq!(Balances::free_balance(OWNER),1000-value);
 		assert_eq!(NuLinkProxy::vault_balance(),value);
@@ -296,7 +247,7 @@ fn it_works_for_policy() {
 
 		// reward in epoch 1 and check it
 		assert_ok!(NuLinkProxy::reward_in_epoch(epoch1));
-		let alluse1 = value * (epoch1-1) / 100;
+		let alluse1 = value * (epoch1-policy_start) / period;
 		// check the reward of the staker
 		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(1),alluse1);
 
@@ -304,10 +255,10 @@ fn it_works_for_policy() {
 		let epoch2 = 80;
 		frame_system::Pallet::<Test>::set_block_number(epoch2);
 		// reward in epoch 2 and check it
-		assert_ok!(NuLinkProxy::reward_in_epoch(epoch1));
-		let alluse1 = value * (epoch2-epoch1) / (100-epoch1);
+		assert_ok!(NuLinkProxy::reward_in_epoch(epoch2));
+		let alluse2 = value * (epoch2-epoch1) / period;
 		// check the reward of the staker
-		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(1),alluse1);
+		assert_eq!(NuLinkProxy::get_staker_reward_by_coinbase(1),alluse1+alluse2);
 	});
 }
 

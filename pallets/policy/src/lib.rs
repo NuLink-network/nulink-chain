@@ -1,16 +1,8 @@
-#![cfg_attr(not(feature = "std"), no_std)]
-
-/// Edit this file to define custom logic or remove it if it is not needed.
-/// Learn more about FRAME and the core library of Substrate FRAME pallets:
-/// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
-
-
 //! # Policy Pallet
-//!
 //! The policy management pallet will manage the policy fees and distribute
 //! them to the stakers accordingly.
 
-
+#![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
 
@@ -20,7 +12,6 @@ use sp_runtime::{traits::{
 use frame_support::{ensure,dispatch::DispatchResult,inherent::Vec, pallet_prelude::*};
 use codec::MaxEncodedLen;
 use nulink_utils::{BasePolicy,GetPolicyInfo,PolicyID,PolicyInfo};
-use nulink_utils::PolicyInfo2;
 
 
 #[macro_use]
@@ -64,12 +55,6 @@ pub mod pallet {
 	pub(super) type Policies<T: Config> = StorageMap<_, Blake2_128Concat, PolicyID,
 		PolicyInfo<T::AccountId,T::BlockNumber,T::Balance>,
 		ValueQuery>;
-
-	// #[pallet::storage]
-	// #[pallet::getter(fn policys2)]
-	// pub(super) type Policys2<T: Config> = StorageMap<_, Blake2_128Concat, PolicyID,
-	// 	PolicyInfo2<T::AccountId, T::BlockNumber>,
-	// 	ValueQuery>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://substrate.dev/docs/en/knowledgebase/runtime/events

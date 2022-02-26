@@ -21,16 +21,6 @@ pub struct PolicyInfo<AccountId,BlockNumber,Balance> {
 	pub stackers:  Vec<AccountId>,
 }
 
-#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default)]
-pub struct PolicyInfo2<AccountId,BlockNumber> {
-	pub p_id: PolicyID,
-	pub policy_start: BlockNumber,
-	// pub period: BlockNumber,
-	// pub policy_stop: BlockNumber,
-	pub policy_owner:  AccountId,
-	// pub stackers:  Vec<AccountId>,
-}
-
 
 pub trait GetPolicyInfo<AccountId,PolicyID,BlockNumber,Balance> {
 	fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<AccountId, BlockNumber,Balance>, DispatchError>;
