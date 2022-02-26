@@ -90,7 +90,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn donate)]
-	pub type donate<T> = StorageValue<_, BalanceOf<T>>;
+	pub type Donate<T> = StorageValue<_, BalanceOf<T>>;
 
 	// Pallets use events to inform users when important changes are made.
 	// check details at: https://substrate.dev/docs/en/knowledgebase/runtime/events
@@ -176,7 +176,7 @@ pub mod pallet {
 				if new_balance >= all_reward {
 					Self::mint_by_staker(all_reward)?;
 					new_balance -= all_reward;
-					donate::<T>::put(new_balance);
+					Donate::<T>::put(new_balance);
 				}
 			}
 			Self::reward_in_epoch(frame_system::Pallet::<T>::block_number())?;
@@ -221,7 +221,7 @@ pub mod pallet {
 
 			let mut new_balance: BalanceOf<T> = Self::get_donate_balance();
 			new_balance += amount;
-			donate::<T>::put(new_balance);
+			Donate::<T>::put(new_balance);
 
 			// Emit an event.
 			Self::deposit_event(Event::ReserveBalance(who, amount));
@@ -261,7 +261,7 @@ impl<T: Config> Pallet<T>  {
 		T::Hashing::hash_of(&s)
 	}
 	pub fn get_donate_balance() -> BalanceOf<T> {
-		match donate::<T>::get() {
+		match Donate::<T>::get() {
 			// Return an error if the value has not been set.
 			None => Zero::zero(),
 			Some(old) => old.clone(),

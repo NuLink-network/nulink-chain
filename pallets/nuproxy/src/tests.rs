@@ -4,7 +4,7 @@ use frame_support::{assert_ok, assert_noop};
 use frame_system::RawOrigin;
 use std::str::FromStr;
 use sp_runtime::testing::H256;
-use sp_std::convert::TryFrom;
+// use sp_std::convert::TryFrom;
 
 
 #[test]
@@ -228,7 +228,7 @@ fn it_works_for_policy() {
 		let period = 100;
 		let block_number = 0;
 		let policy_start = block_number + 1;
-		let policy_end = policy_start + period;
+		// let policy_end = policy_start + period;
 
 		// check the owner asset
 		frame_system::Pallet::<Test>::set_block_number(block_number);

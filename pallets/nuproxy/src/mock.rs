@@ -137,7 +137,7 @@ pub fn create_policy(id: u64,amount: u64,period: u64,policyid: u128,stakers: Vec
 	assert_ok!(NulinkPolicy::base_create_policy(id,policyid,amount,period,stakers));
 	policyid
 }
-pub fn set_the_policy(id: u64,value: u64,pid: u128,stakers: Vec<u64>) -> u128 {
-	assert_ok!(NuLinkProxy::create_policy(id,value,pid.clone(),stakers));
-	pid.clone()
-}
+// pub fn set_the_policy(id: u64,value: u64,pid: u128,stakers: Vec<u64>) -> u128 {
+// 	assert_ok!(NuLinkProxy::create_policy(id,value,pid.clone(),stakers));
+// 	pid.clone()
+// }
