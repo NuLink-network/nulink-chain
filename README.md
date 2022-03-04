@@ -117,6 +117,8 @@ The first step in using this pallet is to register the watcher. Once the registr
 
 1. `origin`: the owner of the watcher, in our example it's `alice`.
 
+![](https://github.com/NuLink-network/nulink/blob/main/img2/Register_Watcher.jpg?raw=true)
+
 Remark: Single watcher is supported currently in this version and the watcher can only be registered once. 
 
 ### Synchronize The Staker By Watcher
@@ -126,17 +128,23 @@ After the watcher registration is completed, the watcher would submit the staker
 1. `origin`: the watcher account(`alice`) registered by `nuproxy.register_watcher` interface.
 2. `infos`: the new list of stakers in the next epoch from ethereum by watcher set.
 
+![](https://github.com/NuLink-network/nulink/blob/main/img2/update_by_epoch.jpg?raw=true)
+
 ### Deposit Local Asset For Reward
 Everyone(normally the DAO treasury) can deposit assets(Local asset[`NLK`]) to the vault by submitting an extrinsic with `nuproxy.reserve_to_vault` function. The asset in the vault is used for assigning basic rewards to the stakers.
 
 1. `origin`: the account(`alice`) who reserves the asset to vault.
 2. `amount`: the amount of the local asset(NLK).
 
+![](https://github.com/NuLink-network/nulink/blob/main/img2/vault.jpg?raw=true)
+
 ### Claim Reward By Staker
 The stakers can retrieve rewards any time by submitting an extrinsic with `nuproxy.claim_reward_by_staker`.
 
 1. `origin`: the staker user account.
 2. `amount`: the amount of the local asset(NLK).
+
+![](https://github.com/NuLink-network/nulink/blob/main/img2/claim.jpg?raw=true)
 
 Remark: The rewards accumulated in the current epoch can be claimed after this epoch.
 
@@ -149,10 +157,12 @@ Users who want to use NuLink’s PRE service can now use `policy.create_policy` 
 4. `period`: the time range for the staker to process the policy. it's counted by the number of block numbers.
 5. `stakers`: the address of the worker who will serve the PRE service for the user.
 
+![](https://github.com/NuLink-network/nulink/blob/main/img2/create_policy.jpg?raw=true)
+
 ### Revoke Policy By User
 Users who have created a policy can use `policy.revoke_policy` to revoke the policy before it expires. The remaining fees of this policy will be returned to the policy creator. And the user can withdraw their remaining balance(NLK) with `nuproxy.claim_reward_by_user`.
 
 1. `origin`: the user account(`alice`) who has created the policy.
 2. `pid`: the ID of the policy which is produced by the user outside.
 
-
+![](https://github.com/NuLink-network/nulink/blob/main/img2/revoke_policy.jpg?raw=true)
