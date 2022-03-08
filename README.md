@@ -101,7 +101,14 @@ If you want to see the multi-node consensus algorithm in action, refer to
 
 ## Usage
 A simple way of using NULINK-NETWORK to distribute rewards to all stakers with local assets(NLK),you can run a local node by using this command `./target/release/nulink-chain --dev --tmp --ws-external`. 
-For using the [Polkadot JS UI](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer), you may need the [types](https://github.com/NuLink-network/nulink-chain/blob/main/types.json) with the UI. After that you can start to register the watcher node and make it work.
+
+Also we provide a parachain for test. You need to use the [Polkadot JS UI](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer) to connect to our test network first. The figure below show you how to switch to our test network. The endpoint for our test parachain is wss://testnet-pok.nulink.org. 
+
+![](https://github.com/NuLink-network/nulink/blob/main/img2/test_endpoint.png?raw=true)
+
+After you connect to our test network, you have to paste the config [types](https://github.com/NuLink-network/nulink-chain/blob/main/types.json) in the setting. After that you can start to register the watcher node and make it work.
+
+![](https://github.com/NuLink-network/nulink/blob/main/img2/app_config.png)
 
 ```
 1. register watcher
@@ -139,14 +146,18 @@ Everyone(normally the DAO treasury) can deposit assets(Local asset[`NLK`]) to th
 ![](https://github.com/NuLink-network/nulink/blob/main/img2/vault.jpg?raw=true)
 
 ### Claim Reward By Staker
-The stakers can retrieve rewards any time by submitting an extrinsic with `nuproxy.claim_reward_by_staker`.
+The stakers can retrieve rewards any time by submitting an extrinsic with `nuproxy.claim_reward_by_staker`. 
 
 1. `origin`: the staker user account.
 2. `amount`: the amount of the local asset(NLK).
 
 ![](https://github.com/NuLink-network/nulink/blob/main/img2/claim.jpg?raw=true)
 
-Remark: The rewards accumulated in the current epoch can be claimed after this epoch.
+Remark1: The rewards accumulated in the current epoch can be claimed after this epoch.
+
+Remark2：In the test network, you may need to add staker account in order to sign this extrinsics.
+You can fill the raw seed when adding the staker account:  0xc8a9dda922026f8cb4619daacecaceaa04c731633cd61a358f5d8803ffe0fd76 or 0x8122683602e7c8ae75076d70c0ffcdec28ba15cd409b42e04001f2f2571391a7.
+
 
 ### Create Policy By User
 Users who want to use NuLink’s PRE service can now use `policy.create_policy` to create policy in the Nulink Network.
