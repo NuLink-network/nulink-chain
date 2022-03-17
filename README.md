@@ -148,7 +148,7 @@ If  you are connecting to your own local parachain. you can now use your watcher
 
 
 1. `origin`: the watcher account(`alice`) registered by `nuproxy.register_watcher` interface.
-2. `infos`: the new list of stakers in the next epoch from ethereum by watcher set.
+2. `infos`: the new list of stakers in the next epoch from ethereum by watcher set.(workbase is the Ethereum address of the staker, coinbase is the bonding parachain address, iswork is the flag to identify if the staker is on duty or not for the upcoming period, locked balance is the amount of the staked NuCypher token, and workcount is a metric to record the number of PRE services this staker provides)
 
 ![](https://github.com/NuLink-network/nulink/blob/main/img2/update_by_epoch.jpg?raw=true)
 
