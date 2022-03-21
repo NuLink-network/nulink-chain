@@ -3,6 +3,8 @@
 //! them to the stakers accordingly.
 
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(clippy::unused_unit)]
+#![allow(clippy::type_complexity)]
 
 pub use pallet::*;
 
@@ -58,6 +60,7 @@ pub mod pallet {
 
 	// Pallets use events to inform users when important changes are made.
 	// https://substrate.dev/docs/en/knowledgebase/runtime/events
+
 	#[pallet::event]
 	#[pallet::metadata(T::AccountId = "AccountId")]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -125,10 +128,10 @@ pub mod pallet {
 
 impl<T: Config> Pallet<T>  {
 	///
-	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,amount: T::Balance,period: T::BlockNumber,
+	pub fn base_create_policy(owner: T::AccountId,pid: PolicyID,amount: T::Balance,policy_period: T::BlockNumber,
 							  stakers: Vec<T::AccountId>) -> DispatchResult {
 		ensure!(!Policies::<T>::contains_key(pid), Error::<T>::RepeatPolicyID);
-		ensure!(stakers.len() > 0, Error::<T>::NotStaker);
+		ensure!(!stakers.is_empty(), Error::<T>::NotStaker);
 
 		// let uni = stakers.clone().into_iter().unique();
 		let mut uni_stakers: Vec<T::AccountId> = vec![];
@@ -139,17 +142,17 @@ impl<T: Config> Pallet<T>  {
 		}
 		// Reserve the asset
 		Policies::<T>::insert(pid, PolicyInfo{
-			p_id:	pid.clone(),
-			period: period,
+			p_id:	pid,
+			period: policy_period,
 			policy_start:  frame_system::Pallet::<T>::block_number() + One::one(),
-			policy_stop:  period + frame_system::Pallet::<T>::block_number() + One::one(),
+			policy_stop:  policy_period + frame_system::Pallet::<T>::block_number() + One::one(),
 			policy_owner: owner.clone(),
-			policy_balance: amount.clone(),
+			policy_balance: amount,
 			stackers: uni_stakers.clone(),
 		});
-		T::PolicyHandle::create_policy(owner.clone(),amount,pid.clone(),uni_stakers.clone())?;
+		T::PolicyHandle::create_policy(owner.clone(),amount,pid,uni_stakers.clone())?;
 		// Emit an event.
-		Self::deposit_event(Event::CreateNewPolicy(pid, owner.clone()));
+		Self::deposit_event(Event::CreateNewPolicy(pid, owner));
 
 		Ok(())
 	}
@@ -168,7 +171,7 @@ impl<T: Config> Pallet<T>  {
 	pub fn get_policy_info_by_pid(pid: PolicyID) -> Result<PolicyInfo<T::AccountId, T::BlockNumber,T::Balance>, DispatchError> {
 		ensure!(Policies::<T>::contains_key(pid), Error::<T>::NotFoundPolicyID);
 		let info = Policies::<T>::get(pid);
-		Ok(info.clone())
+		Ok(info)
 	}
 }
 

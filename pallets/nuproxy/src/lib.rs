@@ -3,6 +3,16 @@
 //! bonding workers from NuCypher contracts in Ethereum to the Polkadot parachain;
 
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(clippy::unused_unit)]
+#![allow(clippy::type_complexity)]
+#![allow(clippy::suspicious_map)]
+#![allow(clippy::try_err)]
+#![allow(clippy::search_is_some)]
+#![allow(clippy::needless_range_loop)]
+#![allow(unused_must_use)]
+#![allow(irrefutable_let_patterns)]
+#![allow(unused_assignments)]
+
 
 #[cfg(test)]
 mod mock;
@@ -155,7 +165,7 @@ pub mod pallet {
 			ensure!(!Self::exist_watcher(who.clone()),Error::<T>::AlreadyExist);
 			let count = <Watchers<T>>::iter().count() as u64;
 			ensure!(count < 1 ,Error::<T>::OnlyOneWatcher);
-			<Watchers<T>>::insert(who.clone(),1);
+			<Watchers<T>>::insert(who,1);
 			Ok(())
 		}
 		/// Update the staker infos and calculate rewards for each epoch, can only be called by watchers.
@@ -180,7 +190,7 @@ pub mod pallet {
 				}
 			}
 			Self::reward_in_epoch(frame_system::Pallet::<T>::block_number())?;
-			if infos.len() > 0 {
+			if !infos.is_empty() {
 				Self::update_stakers(infos)?;
 				Self::remove_unused_staker();
 			}
@@ -249,13 +259,13 @@ impl<T: Config> Pallet<T>  {
 	///
 	/// Include all current and historic skaters.
 	pub fn get_staker_count() -> u64 {
-		return Stakers::<T>::iter().count() as u64;
+		Stakers::<T>::iter().count() as u64
 	}
 	/// Calculate staker hash with coinbase,workbase,workcount field.
 	///
 	/// iswork = false and locked_balance = 0. it is w
 	pub fn calc_staker_hash(staker: StakeInfo<T::AccountId,BalanceOf<T>>) -> T::Hash {
-		let mut s = staker.clone();
+		let mut s = staker;
 		s.iswork = false;
 		s.locked_balance = Zero::zero();
 		T::Hashing::hash_of(&s)
@@ -264,32 +274,31 @@ impl<T: Config> Pallet<T>  {
 		match Donate::<T>::get() {
 			// Return an error if the value has not been set.
 			None => Zero::zero(),
-			Some(old) => old.clone(),
+			Some(old) => old,
 		}
 	}
 	/// Calculate all rewards for stakers after each epoch. 
     /// This will be triggered by the watcher.
 	pub fn calc_reward_by_epoch() -> BalanceOf<T> {
-		let unit = T::RewardUnit::get();
-		unit
+		T::RewardUnit::get()
 		// One::one()
 	}
 	/// Get all balance by all staker's staking
 	pub fn get_total_staking() -> BalanceOf<T> {
 		Stakers::<T>::iter()
 			.filter(|(_,val)| val.iswork)
-			.map(|(_,val)| val.clone())
+			.map(|(_,val)| val)
 			.fold(Zero::zero(),|acc,v|{
 				acc + v.locked_balance
 			})
 	}
 	pub fn exist_watcher(watcher: T::AccountId) -> bool {
-		Watchers::<T>::get(watcher.clone()).is_one()
+		Watchers::<T>::get(watcher).is_one()
 	}
 	pub fn get_active_staker(count: u64) -> Result<Vec<T::AccountId>,DispatchError> {
 		let tmp: Vec<T::AccountId> = Stakers::<T>::iter()
 			.filter(|(_,val)| val.iswork)
-			.map(|(_,val)| val.coinbase.clone())
+			.map(|(_,val)| val.coinbase)
 			.collect();
 		let sum = tmp.len() as u64;
 		if count >= sum {
@@ -318,14 +327,14 @@ impl<T: Config> Pallet<T>  {
 	pub fn remove_unused_watcher() {
 		let unused: Vec<_> = Watchers::<T>::iter()
 			.filter(|&(_, v)| v == 0)
-			.map(|(k, _)| k.clone())
+			.map(|(k, _)| k)
 			.collect();
 		for k in unused { Watchers::<T>::remove(&k); }
 	}
 	pub fn remove_unused_staker() {
 		let unused_keys: Vec<_> = Stakers::<T>::iter()
 			.filter(|(_,val)| !val.iswork && val.workcount > 1)
-			.map(|(k, _)| k.clone())
+			.map(|(k, _)| k)
 			.collect();
 		for k in unused_keys { Stakers::<T>::remove(&k); }
 	}
@@ -334,18 +343,16 @@ impl<T: Config> Pallet<T>  {
 		Rewards::<T>::get(account)
 	}
 	pub fn valid_staker(account: T::AccountId) -> bool {
-		let v: Vec<(T::AccountId,bool)> = Stakers::<T>::iter()
+		Stakers::<T>::iter()
 			.filter(|(_,val)| val.iswork && val.coinbase == account)
 			.map(|(_,val)| (val.coinbase.clone(),val.iswork))
-			.collect();
-		v.len() > 0
+			.count() > 0
 	}
 	pub fn has_staker_by_coinbase(account: T::AccountId) -> bool {
-		let v: Vec<T::AccountId> = Stakers::<T>::iter()
+		Stakers::<T>::iter()
 			.filter(|(_,val)| val.coinbase == account)
-			.map(|(_,val)| val.coinbase.clone())
-			.collect();
-		v.len() > 0
+			.map(|(_,val)| val.coinbase)
+			.count() > 0
 	}
 	/// Remove all the old stakers if `iswork=false` from the staker pool.
 	/// If the `old` staker is still alive in the next epoch, it will be added back to the pool.
@@ -365,7 +372,7 @@ impl<T: Config> Pallet<T>  {
 			.collect::<Vec<_>>();
 
 		for key in keys {
-			Stakers::<T>::mutate(key.clone(),|value|{
+			Stakers::<T>::mutate(key,|value|{
 				value.iswork = false;
 				value.workcount += 1;
 		})}
@@ -375,16 +382,16 @@ impl<T: Config> Pallet<T>  {
 			//if Stakers::<T>::contains_key(new_key.clone()) {
 			if Self::has_staker_by_coinbase(new_staker.coinbase.clone()) {
 				match Self::get_key_by_coinbase(new_staker.coinbase.clone()) {
-					Ok(key) => Stakers::<T>::mutate(key.clone(),|value|{
+					Ok(key) => Stakers::<T>::mutate(key,|value|{
 						value.iswork = true;
 						value.workcount = 0;
 						value.locked_balance = new_staker.locked_balance;
 						value.workbase = new_staker.workbase.clone();
 					}),
-					Err(e) => continue,
+					Err(_e) => continue,
 				}
 			} else {
-				Stakers::<T>::insert(new_key.clone(),new_staker);
+				Stakers::<T>::insert(new_key,new_staker);
 			}
 		}
 		Ok(())
@@ -397,8 +404,8 @@ impl<T: Config> Pallet<T>  {
 		let cur_all_reward: Vec<_> = Stakers::<T>::iter()
 			.filter(|(_,val)| val.iswork)
 			.map(|(_,val)| {
-				let reward = (val.locked_balance.clone() * all_reward.clone()) / total.clone();
-				(val.coinbase.clone(),reward)
+				let reward = (val.locked_balance * all_reward) / total;
+				(val.coinbase,reward)
 			})
 			.collect();
 
@@ -408,13 +415,13 @@ impl<T: Config> Pallet<T>  {
 
 		for i in 0..count {
 			if i == count - 1 {
-				left = all_reward.saturating_sub(all.clone());
+				left = all_reward.saturating_sub(all);
 			} else {
-				left = cur_all_reward[i].1.clone();
+				left = cur_all_reward[i].1;
 			}
-			all = all.saturating_add(left.clone());
+			all = all.saturating_add(left);
 			Rewards::<T>::mutate(cur_all_reward[i].0.clone(),|b| -> DispatchResult {
-				let amount = b.saturating_add(left.clone());
+				let amount = b.saturating_add(left);
 				*b = amount;
 				Ok(())
 			}).unwrap();
@@ -424,7 +431,7 @@ impl<T: Config> Pallet<T>  {
 	pub fn base_reward(account: T::AccountId,balance: BalanceOf<T>) -> DispatchResult {
 		ensure!(balance >= Zero::zero(), Error::<T>::BalanceLow);
 		ensure!(Rewards::<T>::contains_key(account.clone()),Error::<T>::AccountNotExist);
-		let amount: BalanceOf<T> = balance.clone();
+		let amount: BalanceOf<T> = balance;
 
 		Rewards::<T>::mutate(account.clone(), |val| -> DispatchResult {
 			ensure!(*val >= amount, Error::<T>::BalanceLow);
@@ -447,8 +454,8 @@ impl<T: Config> Pallet<T>  {
 	}
 	pub fn get_key_by_coinbase(coinbase: T::AccountId) -> Result<T::Hash,DispatchError> {
 		let hashs = Self::coinbase_to_staker_key(vec![coinbase]);
-		if hashs.len() > 0 {
-			return Ok(hashs[0].clone());
+		if !hashs.is_empty() {
+			return Ok(hashs[0]);
 		}
 		Err(Error::<T>::NoStakerKey.into())
 	}
@@ -507,7 +514,7 @@ impl<T: Config> Pallet<T>  {
 
 							PolicyReserve::<T>::mutate(pid,|x|->DispatchResult {
 								let new_amount = x.1.saturating_sub(all);
-								current_reserve = new_amount.clone();
+								current_reserve = new_amount;
 								x.1 = new_amount;
 								x.2 = num;
 								Ok(())
@@ -518,7 +525,7 @@ impl<T: Config> Pallet<T>  {
 					if last_assign >= info.policy_stop || reserve == Zero::zero() {
 						// the user can stop the policy or Deplete all assets
 						if reserve > Zero::zero() && current_reserve > Zero::zero() {
-							Rewards::<T>::mutate(user.clone(), |val| -> DispatchResult {
+							Rewards::<T>::mutate(user, |val| -> DispatchResult {
 								let new_amount = val.saturating_add(current_reserve);
 								*val = new_amount;
 								Ok(())
@@ -567,7 +574,7 @@ impl<T: Config> BasePolicy<T::AccountId,BalanceOf<T>,PolicyID> for Pallet<T> {
 		}
 
 		PolicyReserve::<T>::mutate(pid, |val| -> DispatchResult {
-			*val = (who.clone(),amount,Zero::zero(),amount.clone());
+			*val = (who.clone(),amount,Zero::zero(),amount);
 			let valut: T::AccountId = Self::account_id();
 			let from = who.clone();
 			T::Currency::transfer(&from,&valut,amount,AllowDeath)
