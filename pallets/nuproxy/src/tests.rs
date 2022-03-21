@@ -216,6 +216,36 @@ fn it_works_for_assigned_by_policy_reward() {
 }
 
 #[test]
+fn it_works_for_get_active_staker() {
+	new_test_ext().execute_with(|| {
+		let s1 = make_stake_infos(1,100,1);
+		let s2 = make_stake_infos(2,200,2);
+		let s3 = make_stake_infos(3,300,3);
+		let s4 = make_stake_infos(4,100,1);
+		let s5 = make_stake_infos(5,100,1);
+		let s6 = make_stake_infos(6,100,1);
+		let stakers = vec![s1.clone(),s2.clone(),s3.clone(),s4.clone(),s5.clone(),s6.clone()];
+		assert_ok!(NuLinkProxy::update_stakers(stakers));
+		frame_system::Pallet::<Test>::set_block_number(0);
+		println!("{:?}",NuLinkProxy::get_active_staker(2).unwrap());
+		println!("{:?}",NuLinkProxy::get_active_staker(2).unwrap());
+		println!("{:?}",NuLinkProxy::get_active_staker(4).unwrap());
+		println!("{:?}",NuLinkProxy::get_active_staker(6).unwrap());
+		println!("{:?}",NuLinkProxy::get_active_staker(8).unwrap());
+
+		// update the block number make it more random
+		frame_system::Pallet::<Test>::set_block_number(3);
+		println!("{:?}",NuLinkProxy::get_active_staker(4).unwrap());
+		frame_system::Pallet::<Test>::set_block_number(5);
+		println!("{:?}",NuLinkProxy::get_active_staker(4).unwrap());
+		frame_system::Pallet::<Test>::set_block_number(8);
+		println!("{:?}",NuLinkProxy::get_active_staker(4).unwrap());
+		frame_system::Pallet::<Test>::set_block_number(10);
+		println!("{:?}",NuLinkProxy::get_active_staker(4).unwrap());
+	});
+}
+
+#[test]
 fn it_works_for_policy() {
 	new_test_ext().execute_with(|| {
 		let staker1 = make_stake_infos(1,100,1);

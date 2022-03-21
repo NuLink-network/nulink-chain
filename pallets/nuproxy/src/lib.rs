@@ -286,17 +286,34 @@ impl<T: Config> Pallet<T>  {
 	pub fn exist_watcher(watcher: T::AccountId) -> bool {
 		Watchers::<T>::get(watcher.clone()).is_one()
 	}
-	pub fn get_active_staker() -> Result<Vec<T::AccountId>,DispatchError> {
+	pub fn get_active_staker(count: u64) -> Result<Vec<T::AccountId>,DispatchError> {
 		let tmp: Vec<T::AccountId> = Stakers::<T>::iter()
 			.filter(|(_,val)| val.iswork)
 			.map(|(_,val)| val.coinbase.clone())
 			.collect();
 		let sum = tmp.len() as u64;
+		if count >= sum {
+			return Ok(tmp)
+		}
 		let bn = frame_system::Pallet::<T>::block_number();
 		let seed: u32 = bn.try_into().map_err(|_| Error::<T>::ConvertFailed)?;
-		let pos = (seed as u64 % sum) as usize;
+		let pos = (seed as u64) % sum;
 		// let pos = (rand::random::<u64>() % sum) as usize;
-		Ok(vec![tmp[pos].clone()])
+		let mut tmp2:Vec<T::AccountId> = Vec::new();
+
+		for i in pos..sum {
+			if count > tmp2.len() as u64 {
+				tmp2.push(tmp[i as usize].clone());
+			}
+		}
+		if count > sum - pos {
+			for i in 0..count-(sum-pos) {
+				if count > tmp2.len() as u64 {
+					tmp2.push(tmp[i as usize].clone());
+				}
+			}
+		}
+		Ok(tmp2)
 	}
 	pub fn remove_unused_watcher() {
 		let unused: Vec<_> = Watchers::<T>::iter()
