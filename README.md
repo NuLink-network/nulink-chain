@@ -179,7 +179,7 @@ You can fill the raw seed when adding the staker account:  0xc8a9dda922026f8cb46
 
 ### Create Policy By User
 
-When user Alice grant access to Bob, the Nucpher client would first create a policy off-chain and then publish this policy in Polkadot Parachain(Please refer [here](https://docs.nucypher.com/en/latest/application_development/cli_examples.html) for more details regarding create policy in Nucypher). Users Alice need to use `policy.create_policy` to create policy in the Nulink Network. 
+When user Alice grant access to Bob, the Nucpher client would first create a policy off-chain and then publish this policy in Polkadot parachain(please refer [here](https://docs.nucypher.com/en/latest/application_development/cli_examples.html) for more details regarding creating a policy in Nucypher). Users Alice need to use `policy.create_policy` to create policy in the Nulink Network. 
 
 1. `origin`: the user account(`alice`) who can create policy.
 2. `pid`: the ID of the policy which is produced by the user off-line(Policy ID is used to identify the policy in the Ursulas network and is uniquely generated when the data owner grants access to the data receiver in the Nucypher client. It is the hash of the pubkey of the data owner, the pubkey of the  data receiver and the policy label. Please check [here](https://github.com/nucypher/nucypher/blob/31bd5a6998760385d5e36bce9a0c55e3ff161cc8/nucypher/policy/policies.py#L86) for more infos).
