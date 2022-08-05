@@ -1,7 +1,7 @@
 # Nulink-chain
 
 <p align="center">
-  <a href="https://www.nulink.org/"><img src="https://github.com/NuLink-network/nulink/blob/94c5538a5fdc25e7d4391f4f2e4af60b3c480fc1/logo/nulink-bg-1.png" width=40%  /></a>
+  <a href="https://www.nulink.org/"><img src="https://github.com/NuLink-network/nulink-resource/blob/94c5538a5fdc25e7d4391f4f2e4af60b3c480fc1/logo/nulink-bg-1.png" width=40%  /></a>
 </p>
 
 <p align="center">
