@@ -189,13 +189,13 @@ When user Alice grant access to Bob, the Nucpher client would first create a pol
 
 ![](https://github.com/NuLink-network/nulink-resource/blob/main/img2/create_policy.jpg?raw=true)
 
-You can check the current stake list through the state query `nuproxy.stakes`.
+You can check the current staker list through the state query `nuproxy.stakes`.
 ![](https://github.com/NuLink-network/nulink-resource/blob/main/img2/stakers.png?raw=true)
 
 
 
 ### Revoke Policy By User
-Users who have created a policy can use `policy.revoke_policy` to revoke the policy before it expires.  The remaining fees of this policy will be returned to the policy creator. 
+Users who have created a policy can use `policy.revoke_policy` to revoke the policy before it expires.  The remaining fees of this policy will be refunded to the policy creator. 
 
 1. `origin`: the user account(`alice`) who has created the policy.
 2. `pid`: the ID of the policy which is produced by the user outside.
@@ -205,7 +205,7 @@ Users who have created a policy can use `policy.revoke_policy` to revoke the pol
 
 ### Claim the Remaining Balance By Policy Creator
 
-The policy creator can claim back all his remaining balance after he revokes the policy. He can simply  send the`nuproxy.claim_reward_by_user` extrinsic. 
+The policy creator can claim back all his remaining balance after he revokes the policy. He can simply  submit the`nuproxy.claim_reward_by_user` extrinsic. 
 
 ![](https://github.com/NuLink-network/nulink-resource/blob/main/img2/claimbyuser.png?raw=true)
 
